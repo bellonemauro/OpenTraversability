@@ -27,7 +27,7 @@ if(COMMAND cmake_policy) #return true if the COMMAND cmake_policy exist - this a
 endif(COMMAND cmake_policy)
 
 include(${PROJECT_SOURCE_DIR}/CMakeModules/script_init_cmake.cmake REQUIRED)		# CMake configurations
-include(${PROJECT_SOURCE_DIR}/CMakeModules/utilsMacros.cmake REQUIRED)		        # CMake macros 
+include(${PROJECT_SOURCE_DIR}/CMakeModules/UtilsMacros.cmake REQUIRED)		        # CMake macros 
 
 set (OTA_SOURCE_DIR ${PROJECT_SOURCE_DIR})
 
