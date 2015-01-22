@@ -14,4 +14,4 @@ Dependences:
 
 PCL 1.7
 
-QT4	
+QT4	--- QVTK is mandatory!!!
