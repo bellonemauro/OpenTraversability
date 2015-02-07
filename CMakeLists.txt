@@ -56,6 +56,13 @@ add_definitions (${PCL_DEFINITIONS})
 #  Add options to build specific targets
 # --------------------------------------
 option(ENABLE_SOLUTION_FOLDERS "Enable folders for MSVC - ON by default if MSVC - OFF otherwise" ON)
+if (MSVC)
+  set (ENABLE_SOLUTION_FOLDERS 1)
+  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+else (MSVC)
+  set (ENABLE_SOLUTION_FOLDERS 0)
+endif (MSVC) 
+
 option(ENABLE_setLocalDebugEnvironment "Set the local environment variables for debugging --- USE THIS ONLY FOR DEBUG" "OFF")
 if(MSVC AND ENABLE_setLocalDebugEnvironment)
 #this is not for all users !!!!
