@@ -7,7 +7,7 @@
 #  | Released under BDS License.                                               |
 #  +---------------------------------------------------------------------------+ */
 
-project(ALL_OT_LIBS)
+project(ALL_OTA_LIBS)
 
 # Enumerate all subdirs and process them:
 list_subdirectories(LIST_LIBS_DIRS "${CMAKE_SOURCE_DIR}/libs")
