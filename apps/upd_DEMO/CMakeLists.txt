@@ -25,7 +25,7 @@ include  (${QT_USE_FILE})
 set  (PCL_upd_DEMO_SOURCES ${PCL_upd_DEMO_SOURCE_DIR}/main.cpp ${PCL_upd_DEMO_SOURCE_DIR}/PCL_upd_DEMO.cpp) 	# sources
 set  (PCL_upd_DEMO_HEADERS ${PCL_upd_DEMO_SOURCE_DIR}/PCL_upd_DEMO.h)	   			# headers
 set  (PCL_upd_DEMO_FORMS   ${PCL_upd_DEMO_SOURCE_DIR}/PCL_upd_DEMO.ui)				# graphical interface
-set  (VTK_LIBRARIES   )#vtkRendering vtkGraphics vtkHybrid QVTK)  #--> the specific libraries are not necessary in VTK6.1
+set  (VTK_LIBRARIES  vtkRendering vtkGraphics vtkHybrid QVTK)  #--> the specific libraries are not necessary in VTK6.1
 
 QT4_WRAP_CPP (PCL_upd_DEMO_HEADERS_MOC   ${PCL_upd_DEMO_HEADERS})
 QT4_WRAP_UI  (PCL_upd_DEMO_FORMS_HEADERS ${PCL_upd_DEMO_FORMS})
