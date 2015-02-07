@@ -62,12 +62,15 @@ include(${CMAKE_SOURCE_DIR}/CMakeModules/script_setLocalDebugEnvironment.cmake R
 endif(MSVC AND setLocalDebugEnvironment)
 
 
+# add all libraries in the /libs folder
+add_subdirectory(libs) 
+
 # --------------------------------------
 #  upd_lib 
 # --------------------------------------
 option(BUILD_UPD "Option for building UPD_lib - ON by default" ON)
 if (BUILD_UPD)
-	add_subdirectory(libs/upd_lib)
+	#add_subdirectory(libs/upd_lib)
 	set (upd_lib_INCLUDE_DIR ${upd_lib_SOURCE_DIR}/include )
 	include_directories("${upd_lib_INCLUDE_DIR}")   
 endif(BUILD_UPD)
