@@ -55,11 +55,12 @@ add_definitions (${PCL_DEFINITIONS})
 # --------------------------------------
 #  Add options to build specific targets
 # --------------------------------------
-option(setLocalDebugEnvironment "Set the local environment variables for debugging --- USE THIS ONLY FOR DEBUG" "OFF")
-if(MSVC AND setLocalDebugEnvironment)
+option(ENABLE_SOLUTION_FOLDERS "Enable folders for MSVC - ON by default if MSVC - OFF otherwise" ON)
+option(ENABLE_setLocalDebugEnvironment "Set the local environment variables for debugging --- USE THIS ONLY FOR DEBUG" "OFF")
+if(MSVC AND ENABLE_setLocalDebugEnvironment)
 #this is not for all users !!!!
 include(${CMAKE_SOURCE_DIR}/CMakeModules/script_setLocalDebugEnvironment.cmake REQUIRED)		# debug local environment configurations
-endif(MSVC AND setLocalDebugEnvironment)
+endif(MSVC AND ENABLE_setLocalDebugEnvironment)
 
 
 # add all libraries in the /libs folder
@@ -68,21 +69,19 @@ add_subdirectory(libs)
 # --------------------------------------
 #  upd_lib 
 # --------------------------------------
-option(BUILD_UPD "Option for building UPD_lib - ON by default" ON)
-if (BUILD_UPD)
+
 	#add_subdirectory(libs/upd_lib)
 	set (upd_lib_INCLUDE_DIR ${upd_lib_SOURCE_DIR}/include )
 	include_directories("${upd_lib_INCLUDE_DIR}")   
-endif(BUILD_UPD)
 
 
 # --------------------------------------
 #  apps
 # --------------------------------------
-OPTION(BUILD_apps "Option for building apps - ON by default" ON)
-if (BUILD_apps)
+OPTION(ENABLE_BUILD_apps "Option for building apps - ON by default" ON)
+if (ENABLE_BUILD_apps)
 	add_subdirectory(apps)
-endif(BUILD_apps)
+endif(ENABLE_BUILD_apps)
 # --------------------------------------
 #  apps 
 # --------------------------------------

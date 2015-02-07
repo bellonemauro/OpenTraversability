@@ -9,7 +9,6 @@
 
 #include "PCL_upd_DEMO.h"
 
-
 PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   QMainWindow (parent),
   ui (new Ui::PCL_upd_DEMO)
@@ -109,6 +108,15 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
 
   viewer->addCoordinateSystem (1.0);
   viewer->addPointCloud (cloud, "cloud");
+
+  // Add point picking callback to viewer:
+
+
+  clicked_points_3d.reset(new PointCloudT);
+  cb_args.clicked_points_3d = clicked_points_3d;
+  cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);//pcl::visualization::PCLVisualizer::Ptr(viewer);
+  viewer->registerPointPickingCallback (PCL_upd_DEMO::pp_callback, (void*)&cb_args);
+  std::cout << "Shift+click on three floor points, then press 'Q'..." << std::endl;
 
   pSliderValueChanged (2);
   viewer->resetCamera ();
@@ -855,6 +863,26 @@ void PCL_upd_DEMO::angleSliderChange(int value)
 
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
   }
+
+
+
+void
+PCL_upd_DEMO::pp_callback ( pcl::visualization::PointPickingEvent& event, void* args)
+{
+  struct callback_args* data = (struct callback_args *)args;
+  if (event.getPointIndex () == -1)
+    return;
+  PointT current_point;
+  event.getPoint(current_point.x, current_point.y, current_point.z);
+  data->clicked_points_3d->points.push_back(current_point);
+  // Draw clicked points in red:
+  pcl::visualization::PointCloudColorHandlerCustom<PointT> red (data->clicked_points_3d, 255, 0, 0);
+  data->viewerPtr->removePointCloud("clicked_points");
+  data->viewerPtr->addPointCloud(data->clicked_points_3d, red, "clicked_points");
+  data->viewerPtr->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "clicked_points");
+  std::cout << current_point.x << " " << current_point.y << " " << current_point.z << std::endl;
+}
+
 
 
 void PCL_upd_DEMO::about()

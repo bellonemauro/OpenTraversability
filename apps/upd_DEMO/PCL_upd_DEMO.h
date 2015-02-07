@@ -212,10 +212,15 @@ public slots:
 
 
 protected:
+  
+  void pp_callback ( pcl::visualization::PointPickingEvent& event, void* args);	
+	
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
   PointCloudT::Ptr cloud;           			//--> allocate a cloud for visualization and data processing
   PointCloudT::Ptr cloud_filtered;  			//--> allocate a cloud for filtering
   PointCloudT::Ptr cloud_color_UPD;             //--> allocate a cloud for visualization and data processing
+  PointCloudT::Ptr clicked_points_3d;// (new PointCloudT);
+
   upd *m_upd;
   pcl::PointCloud<pcl::PointSurfel>::Ptr UPD_cloud;     //--> processed cloud
 
@@ -231,6 +236,17 @@ protected:
   unsigned int red;
   unsigned int green;
   unsigned int blue;
+
+
+  struct callback_args{
+  // structure used to pass arguments to the callback function
+  PointCloudT::Ptr clicked_points_3d;
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewerPtr;
+  callback_args(pcl::visualization::PointPickingEvent& , callback_args){}
+  //pcl::visualization::PCLVisualizer::Ptr viewerPtr;
+};
+
+  struct callback_args cb_args;
 
 private:
 
