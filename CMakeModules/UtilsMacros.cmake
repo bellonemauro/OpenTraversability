@@ -151,3 +151,27 @@ macro(KEEP_MATCHING_FILES_FROM_LIST match_expr lst_files)
 	ENDFOREACH(FIL)
 	SET(${lst_files} ${lst_files_aux})
 endmacro(KEEP_MATCHING_FILES_FROM_LIST)
+
+# this macro extract release and debug dlls from a directory to chose which one have to be installed
+# EXTRACT_DEB_REL_DLLS  -- macro name
+# DLL_DIR        --- in - the folder where you want to search dlls
+# DEBUG_POSTFIX  --- in - debug postfix to be analysed
+# 
+# /note this macro create and replace 2 vars  REL_DLLS and DEB_DLLS 
+#       such variables are intentionally NOT cached by cmake
+# /note This macro is only for windows !! 
+macro (EXTRACT_DEB_REL_DLLS DLL_DIR DEBUG_POSTFIX)
+      
+	  if (EXISTS ${DLL_DIR})
+
+		FILE(GLOB REL_DLLS "${DLL_DIR}/*.dll")
+		FILE(GLOB DEB_DLLS "${DLL_DIR}/*${DEBUG_POSTFIX}.dll")	
+
+		FOREACH(F ${DEB_DLLS} )
+		LIST (REMOVE_ITEM REL_DLLS "${F}")
+		ENDFOREACH(F)
+	  else ()
+		message (WARNING "EXTRACT_DEB_REL_DLLS error - dir empty")
+	  endif ()
+	  
+endmacro (EXTRACT_DEB_REL_DLLS)

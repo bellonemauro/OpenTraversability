@@ -160,7 +160,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="PointsCloud">
        <attribute name="title">
@@ -1525,6 +1525,50 @@
         </property>
        </widget>
       </widget>
+      <widget class="QWidget" name="classifier">
+       <attribute name="title">
+        <string>Terrain Classifier</string>
+       </attribute>
+       <widget class="QPushButton" name="pushButton_startLabelling">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>40</y>
+          <width>111</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Start Labelling</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ground">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>100</y>
+          <width>111</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Ground</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_notGround">
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>100</y>
+          <width>111</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Not Ground</string>
+        </property>
+       </widget>
+      </widget>
      </widget>
      <widget class="QLabel" name="label_fileStatus_cloud">
       <property name="geometry">
@@ -1577,7 +1621,7 @@
      <x>0</x>
      <y>0</y>
      <width>1310</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

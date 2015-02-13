@@ -113,9 +113,9 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
 
 
   clicked_points_3d.reset(new PointCloudT);
-  cb_args.clicked_points_3d = clicked_points_3d;
-  cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);//pcl::visualization::PCLVisualizer::Ptr(viewer);
-  viewer->registerPointPickingCallback (PCL_upd_DEMO::pp_callback, (void*)&cb_args);
+  //cb_args.clicked_points_3d = clicked_points_3d;
+  //cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);//pcl::visualization::PCLVisualizer::Ptr(viewer);
+  //viewer->registerPointPickingCallback (PCL_upd_DEMO::pp_callback, (void*)&cb_args);
   std::cout << "Shift+click on three floor points, then press 'Q'..." << std::endl;
 
   pSliderValueChanged (2);

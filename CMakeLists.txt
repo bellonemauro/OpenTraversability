@@ -96,7 +96,7 @@ endif(ENABLE_BUILD_apps)
 # --------------------------------------
 #  settings for install and package --- not supported yet
 # --------------------------------------					
-#include(${PROJECT_SOURCE_DIR}/CMakeModules/script_BuildInstall.cmake REQUIRED)		# CMake configurations
-#include(${PROJECT_SOURCE_DIR}/CMakeModules/script_BuildPackage.cmake REQUIRED)		# CMake configurations						
+include(${PROJECT_SOURCE_DIR}/CMakeModules/script_BuildInstall.cmake REQUIRED)		# CMake configurations
+include(${PROJECT_SOURCE_DIR}/CMakeModules/script_BuildPackage.cmake REQUIRED)		# CMake configurations						
 						
 						

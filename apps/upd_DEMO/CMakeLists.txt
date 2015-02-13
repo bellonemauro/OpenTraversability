@@ -18,6 +18,7 @@ include_directories(${Boost_LIBRARY_DIR})
 include_directories(${Boost_INCLUDE_DIRS})
 include  (${QT_USE_FILE})
 
+find_package ( VTK REQUIRED)
 
 # --------------------------------------
 #  set variables for compilation 
@@ -25,7 +26,7 @@ include  (${QT_USE_FILE})
 set  (PCL_upd_DEMO_SOURCES ${PCL_upd_DEMO_SOURCE_DIR}/main.cpp ${PCL_upd_DEMO_SOURCE_DIR}/PCL_upd_DEMO.cpp) 	# sources
 set  (PCL_upd_DEMO_HEADERS ${PCL_upd_DEMO_SOURCE_DIR}/PCL_upd_DEMO.h)	   			# headers
 set  (PCL_upd_DEMO_FORMS   ${PCL_upd_DEMO_SOURCE_DIR}/PCL_upd_DEMO.ui)				# graphical interface
-set  (VTK_LIBRARIES  vtkRendering vtkGraphics vtkHybrid QVTK)  #--> the specific libraries are not necessary in VTK6.1
+set  (VTK_LIBRARIES )# vtkRendering vtkGraphics vtkHybrid QVTK)  #--> the specific libraries are not necessary in VTK6.1
 
 QT4_WRAP_CPP (PCL_upd_DEMO_HEADERS_MOC   ${PCL_upd_DEMO_HEADERS})
 QT4_WRAP_UI  (PCL_upd_DEMO_FORMS_HEADERS ${PCL_upd_DEMO_FORMS})
@@ -42,6 +43,7 @@ link_directories(${QT_LIBRARY_DIR})
 link_directories(${QT_BINARY_DIR})
 
 
+
 # --------------------------------------
 #  add definitions
 # --------------------------------------
@@ -56,6 +58,7 @@ target_link_libraries ( PCL_upd_DEMO  upd_lib
 						${Boost_LIBRARIES}
 						${PCL_LIBRARIES} 
 						${QT_LIBRARIES}
-						${VTK_LIBRARIES}) 
+						${VTK_LIBRARIES})
+message(STATUS " VTK_LIBRARIES ===  ${VTK_LIBRARIES} ")						
 
 					

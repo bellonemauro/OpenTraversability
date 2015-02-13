@@ -242,7 +242,7 @@ protected:
   // structure used to pass arguments to the callback function
   PointCloudT::Ptr clicked_points_3d;
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewerPtr;
-  callback_args(pcl::visualization::PointPickingEvent& , callback_args){}
+  //callback_args(pcl::visualization::PointPickingEvent& , callback_args){}
   //pcl::visualization::PCLVisualizer::Ptr viewerPtr;
 };
 
