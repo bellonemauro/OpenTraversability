@@ -18,31 +18,38 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   this->setWindowTitle (" PCL - Traversability - DEMO");
 
   // Setup the cloud pointer
-  cloud.reset (new PointCloudT);
-  cloud_color_UPD.reset(new PointCloudT);
-  cloud_filtered.reset (new PointCloudT);
+  m_cloud.reset (new PointCloudT);
+  m_cloud_color_UPD.reset(new PointCloudT);
+  m_cloud_filtered.reset (new PointCloudT);
+  m_labeled_point.reset (new PointCloudT);
+  m_labeled_cloud.reset (new PointCloudT);
   UPD_cloud.reset( new pcl::PointCloud<pcl::PointSurfel> );
   m_transformation = Eigen::Affine3f::Identity();
+
+  
+
+  _label_counter = 0;
+  _labelled_paused = false;
 
   //pcl::PCDReader reader;
   //reader.read("./logo.pcd", *cloud);
 
-  if (pcl::io::loadPCDFile ("./logo.pcd", *cloud) == -1) //* load the file
+  if (pcl::io::loadPCDFile ("./logo.pcd", *m_cloud) == -1) //* load the file
   {
     PCL_ERROR ("Couldn't read file logo.pcd \n");
 	PCL_ERROR ("Using example random cloud \n");
 	    // The number of points in the cloud
-	cloud->points.resize (200);
+	m_cloud->points.resize (200);
 	    // Fill the cloud with some points
-	  for (size_t i = 0; i < cloud->points.size (); ++i)
+	  for (size_t i = 0; i < m_cloud->points.size (); ++i)
 	  {
-		cloud->points[i].x = 1.024 * rand () / (RAND_MAX + 1.0f);
-		cloud->points[i].y = 1.024 * rand () / (RAND_MAX + 1.0f);
-		cloud->points[i].z = 1.024 * rand () / (RAND_MAX + 1.0f);
+		m_cloud->points[i].x = 1.024 * rand () / (RAND_MAX + 1.0f);
+		m_cloud->points[i].y = 1.024 * rand () / (RAND_MAX + 1.0f);
+		m_cloud->points[i].z = 1.024 * rand () / (RAND_MAX + 1.0f);
 
-		cloud->points[i].r = red;
-		cloud->points[i].g = green;
-		cloud->points[i].b = blue;
+		m_cloud->points[i].r = red;
+		m_cloud->points[i].g = green;
+		m_cloud->points[i].b = blue;
 	  }
 
 
@@ -74,6 +81,7 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->actionImages_Folder, SIGNAL(activated()), this, SLOT(openImagesFolder()));
   connect (ui->actionSave_Cloud, SIGNAL(activated()), this, SLOT(saveFile()));
   connect (ui->actionSave_UPD, SIGNAL(activated()), this, SLOT(saveUPDFile()));
+  connect (ui->actionLabelled_Cloud, SIGNAL(activated()), this, SLOT(saveLabeledFile()));
   connect (ui->actionAbout, SIGNAL(activated()), this, SLOT (about()));
   connect (ui->actionRemove_Filters, SIGNAL(activated()), this, SLOT(removeFilters()) );
   connect (ui->actionGenerate_sample_cloud, SIGNAL(activated()), this, SLOT(GenerateSampleCloud()));
@@ -87,7 +95,12 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->pushButton_applyTransformation, SIGNAL(clicked()), this, SLOT(applyTransformation()));
   connect (ui->pushButton_updateVis, SIGNAL (clicked()), this, SLOT(switchVisualization()));
   connect (ui->pushButton_runUPD, SIGNAL(clicked()), this, SLOT(runUPD()));
-
+  connect (ui->pushButton_start_stopLabelling, SIGNAL(clicked()), this, SLOT (startStopLabelling()));
+  connect (ui->pushButton_ground, SIGNAL(clicked()), this, SLOT (labelGround()));
+  connect (ui->pushButton_notGround, SIGNAL(clicked()), this, SLOT (labelNotGround()));
+  connect (ui->pushButton_clearLabelling, SIGNAL(clicked()), this, SLOT (clearLabelling()));
+  
+  
   // sliders
   connect (ui->horizontalSlider_p, SIGNAL (valueChanged (int)), this, SLOT (pSliderValueChanged (int)));
   connect (ui->horizontalSlider_unevennessIndex, SIGNAL (valueChanged (int)), this, SLOT (unevenessSliderChange (int)));
@@ -98,22 +111,24 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->lineEdit_saveFolder, SIGNAL(returnPressed()), this, SLOT (setSaveFolder()));
   connect (ui->listWidget_pcdNames, SIGNAL(itemDoubleClicked (QListWidgetItem*)), this, SLOT(updatePCDview()));
   connect (ui->listWidget_imageNames, SIGNAL(itemDoubleClicked (QListWidgetItem*)), this, SLOT(updateImagesView()));
+  connect (ui->treeWidget_classification, SIGNAL(itemDoubleClicked (QTreeWidgetItem *,int)), this, SLOT(selectPointLabel())); 
   //connect (ui->checkBox_filpNormals, SIGNAL(clicked()), this, SLOT(setFlip()));
   connect (ui->radioButton_radius, SIGNAL(clicked()), this, SLOT(setRadiusOrKNeighborsMethod()));
   connect (ui->radioButton_kNeighbors, SIGNAL(clicked()), this, SLOT(setRadiusOrKNeighborsMethod()));
 
   connect (ui->checkBox_visTraversability, SIGNAL (clicked()), this, SLOT(switchVisualization()));
 
-  
+   ui->treeWidget_classification->resizeColumnToContents(0);
+   ui->treeWidget_classification->resizeColumnToContents(1);
 
   viewer->addCoordinateSystem (1.0);
-  viewer->addPointCloud (cloud, "cloud");
+  viewer->addPointCloud (m_cloud, "cloud");
 
   // Add point picking callback to viewer:
 
 
-  clicked_points_3d.reset(new PointCloudT);
-  //cb_args.clicked_points_3d = clicked_points_3d;
+  m_clicked_points_3d.reset(new PointCloudT);
+  //cb_args.m_clicked_points_3d = m_clicked_points_3d;
   //cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);//pcl::visualization::PCLVisualizer::Ptr(viewer);
   //viewer->registerPointPickingCallback (PCL_upd_DEMO::pp_callback, (void*)&cb_args);
   std::cout << "Shift+click on three floor points, then press 'Q'..." << std::endl;
@@ -300,11 +315,11 @@ void PCL_upd_DEMO::updateImagesView()
 
 	if (m_file_pcd_list.size () > image_index)
 	{
-		if (pcl::io::loadPCDFile (m_file_pcd_list.at(image_index).toStdString(), *cloud)) QMessageBox::warning(this, "Warning !", "File not found !");
+		if (pcl::io::loadPCDFile (m_file_pcd_list.at(image_index).toStdString(), *m_cloud)) QMessageBox::warning(this, "Warning !", "File not found !");
 //TODO - the status bar doesn't properly work
-    pcl::transformPointCloud(*cloud, *cloud, m_transformation);
+    pcl::transformPointCloud(*m_cloud, *m_cloud, m_transformation);
     ui->label_fileStatus_cloud->setText(m_file_pcd_list.at(image_index));  // set the status bar to the current pcd
-    if(!viewer->updatePointCloud (cloud, "cloud"))QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
+    if(!viewer->updatePointCloud (m_cloud, "cloud"))QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
 	//else QMessageBox::warning(this, "Warning !", " Viewer updated!");
 		}
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
@@ -318,14 +333,14 @@ void PCL_upd_DEMO::openFile()
 	QString cloud_path = QFileDialog::getOpenFileName (this, tr("Open cloud"), QDir::currentPath(),  // dialog to open files
 						"ASCII Point Cloud File (*.pcd);; Binary Cloud File (*.bin);; All Files(*.*)" , 0);
 
-	if (pcl::io::loadPCDFile (cloud_path.toUtf8().constData(), *cloud) == -1) QMessageBox::warning(this, "Warning !", "File not found ! <br>" + cloud_path);
+	if (pcl::io::loadPCDFile (cloud_path.toUtf8().constData(), *m_cloud) == -1) QMessageBox::warning(this, "Warning !", "File not found ! <br>" + cloud_path);
                 //cout << "Loaded " << cloud->size () << " data points from " << m_file_pcd_list.at(0) << endl;
 
    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
    ui->label_fileStatus_cloud->setText(QString::fromStdString(cloud_path.toUtf8().constData()));  // set the status bar to the current pcd
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");
-   viewer->updatePointCloud (cloud, "cloud");
+   viewer->updatePointCloud (m_cloud, "cloud");
 		ui->qvtkWidget->update ();
 }
 
@@ -337,7 +352,7 @@ PCL_upd_DEMO::saveFile()
 	QString cloud_path = QFileDialog::getSaveFileName (this, tr("Save ASCII cloud"), QDir::currentPath(),  // dialog to open files
 						"ASCII Point Cloud File (*.pcd);; Binary Cloud File (*.bin);; All Files(*.*)" , 0);
 
-	if (pcl::io::savePCDFileASCII (cloud_path.toUtf8().constData(), *cloud) == -1) QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + cloud_path);
+	if (pcl::io::savePCDFileASCII (cloud_path.toUtf8().constData(), *m_cloud) == -1) QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + cloud_path);
                 //cout << "Loaded " << cloud->size () << " data points from " << m_file_pdc_list.at(0) << endl;
 
    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
@@ -362,16 +377,33 @@ PCL_upd_DEMO::saveUPDFile()
 
 }
 
+void 
+PCL_upd_DEMO::saveLabeledFile()
+{
+
+	QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+	/*if (UPD_cloud->isEmpty()) 
+	{QMessageBox::warning(this, "Warning !", "UPD cloud empty not saved  ! " );
+	}*/
+	QString cloud_path = QFileDialog::getSaveFileName (this, tr("Save ASCII cloud"), QDir::currentPath(),  // dialog to open files
+						"ASCII Point Cloud File (*.pcd);; Binary Cloud File (*.bin);; All Files(*.*)" , 0);
+
+	if (pcl::io::savePCDFileASCII (cloud_path.toUtf8().constData(), *m_labeled_cloud) == -1) QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + cloud_path);
+                //cout << "Loaded " << cloud->size () << " data points from " << m_file_pcd_list.at(0) << endl;
+
+   QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+
+}
 void PCL_upd_DEMO::updatePCDview()
 {
    QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
    int pcd_index = ui->listWidget_pcdNames->currentRow();      // take the pcd address from the listWidget selected row and read the cloud
   
-   if (pcl::io::loadPCDFile (m_file_pcd_list.at(pcd_index).toStdString(), *cloud)) QMessageBox::warning(this, "Warning !", "File not found !");
+   if (pcl::io::loadPCDFile (m_file_pcd_list.at(pcd_index).toStdString(), *m_cloud)) QMessageBox::warning(this, "Warning !", "File not found !");
 //TODO - the status bar doesn't properly work
-    pcl::transformPointCloud(*cloud, *cloud, m_transformation);
+    pcl::transformPointCloud(*m_cloud, *m_cloud, m_transformation);
     ui->label_fileStatus_cloud->setText(m_file_pcd_list.at(pcd_index));  // set the status bar to the current pcd
-    if(!viewer->updatePointCloud (cloud, "cloud"))QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
+    if(!viewer->updatePointCloud (m_cloud, "cloud"))QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
 	//else QMessageBox::warning(this, "Warning !", " Viewer updated!");
 
 
@@ -392,16 +424,16 @@ void PCL_upd_DEMO::updatePCDview()
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-   viewer->updatePointCloud (cloud, "cloud");
+   viewer->updatePointCloud (m_cloud, "cloud");
    ui->qvtkWidget->update ();
-    pcl::copyPointCloud(*cloud, *cloud_filtered);   // copy the cloud into the filtered cloud to avoid filtering mistakes
+    pcl::copyPointCloud(*m_cloud, *m_cloud_filtered);   // copy the cloud into the filtered cloud to avoid filtering mistakes
 }
 
 void PCL_upd_DEMO::applyPassthrogh()
 {
    QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
    
-   if(cloud_filtered->empty())removeFilters();
+   if(m_cloud_filtered->empty())removeFilters();
 
     pcl::PassThrough<pcl::PointXYZRGBA> pass;
     double z_min = 0;
@@ -422,10 +454,10 @@ void PCL_upd_DEMO::applyPassthrogh()
  		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 		return;
     };
-    pass.setInputCloud (cloud_filtered);
+    pass.setInputCloud (m_cloud_filtered);
     pass.setFilterFieldName ("z");
     pass.setFilterLimits (z_min, z_max);
-    pass.filter (*cloud_filtered);
+    pass.filter (*m_cloud_filtered);
 
     double y_min = 0;
     double y_max = 0;
@@ -444,10 +476,10 @@ void PCL_upd_DEMO::applyPassthrogh()
  		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 		return;
     }
-    pass.setInputCloud (cloud_filtered);
+    pass.setInputCloud (m_cloud_filtered);
     pass.setFilterFieldName ("y");
     pass.setFilterLimits (y_min, y_max);
-    pass.filter (*cloud_filtered);
+    pass.filter (*m_cloud_filtered);
 
     double x_min = 0;
     double x_max = 0;
@@ -466,15 +498,15 @@ void PCL_upd_DEMO::applyPassthrogh()
  		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 		return;
     }
-    pass.setInputCloud (cloud_filtered);
+    pass.setInputCloud (m_cloud_filtered);
     pass.setFilterFieldName ("x");
     pass.setFilterLimits (x_min, x_max);
-    pass.filter (*cloud_filtered);
+    pass.filter (*m_cloud_filtered);
 
-//    QMessageBox::warning(this, "Warning !", "Only " + QString::number(cloud_filtered->size()) + " points remained ");
+//    QMessageBox::warning(this, "Warning !", "Only " + QString::number(m_cloud_filtered->size()) + " points remained ");
 
     viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-    viewer->updatePointCloud (cloud_filtered, "cloud");
+    viewer->updatePointCloud (m_cloud_filtered, "cloud");
     ui->qvtkWidget->update ();
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 }
@@ -484,10 +516,10 @@ void PCL_upd_DEMO::applyVoxelization()
 	QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
    //QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
-	if(cloud_filtered->empty())removeFilters();
+	if(m_cloud_filtered->empty())removeFilters();
 
     pcl::VoxelGrid<pcl::PointXYZRGBA> ds;  //create downsampling filter
-    ds.setInputCloud (cloud_filtered);
+    ds.setInputCloud (m_cloud_filtered);
     double leaf_size = 0;
     bool isNumeric;
     leaf_size = ui->lineEdit_leafSize->text().toDouble(&isNumeric);
@@ -509,12 +541,12 @@ void PCL_upd_DEMO::applyVoxelization()
 
     ds.setLeafSize (leaf_size, leaf_size, leaf_size);
 	//ds.setMinimumPointsNumberPerVoxel (minPointsPerVoxel);
-    ds.filter (*cloud_filtered);
+    ds.filter (*m_cloud_filtered);
    
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-    viewer->updatePointCloud (cloud_filtered, "cloud");
+    viewer->updatePointCloud (m_cloud_filtered, "cloud");
     ui->qvtkWidget->update ();
 
 }
@@ -523,10 +555,10 @@ void PCL_upd_DEMO::applySOR()
 {
    QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
    //QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
-   if(cloud_filtered->empty())removeFilters();
+   if(m_cloud_filtered->empty())removeFilters();
 
     pcl::StatisticalOutlierRemoval<pcl::PointXYZRGBA> sor;
-    sor.setInputCloud (cloud_filtered);
+    sor.setInputCloud (m_cloud_filtered);
 
     double sor_meanK = 0;
     double sor_std = 0;
@@ -548,20 +580,20 @@ void PCL_upd_DEMO::applySOR()
     }
     sor.setMeanK (sor_meanK);
     sor.setStddevMulThresh (sor_std);
-    sor.filter (*cloud_filtered);
+    sor.filter (*m_cloud_filtered);
 
     QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-    viewer->updatePointCloud (cloud_filtered, "cloud");
+    viewer->updatePointCloud (m_cloud_filtered, "cloud");
     ui->qvtkWidget->update ();
 }
 
 void PCL_upd_DEMO::removeFilters()
 {
-    pcl::copyPointCloud(*cloud, *cloud_filtered);
+    pcl::copyPointCloud(*m_cloud, *m_cloud_filtered);
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-    viewer->updatePointCloud (cloud, "cloud");
+    viewer->updatePointCloud (m_cloud, "cloud");
     ui->qvtkWidget->update ();
 
 }
@@ -576,65 +608,66 @@ bool isNumeric;
 roll = ui->lineEdit_roll->text().toDouble(&isNumeric);
 if(!isNumeric)
 {
+		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
     QMessageBox::warning(this, "Warning !", "Roll is not a valid number - the transformation cannot be applied !");
- 		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 		return;
 }
 double pitch = 0;
 pitch = ui->lineEdit_pitch->text().toDouble(&isNumeric);
 if(!isNumeric)
 {
-    QMessageBox::warning(this, "Warning !", "pitch is not a valid number - the transformation cannot be applied !");
  		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
-		return;
+   QMessageBox::warning(this, "Warning !", "pitch is not a valid number - the transformation cannot be applied !");
+ 		return;
 }
 double yaw = 0;
 yaw = ui->lineEdit_yaw->text().toDouble(&isNumeric);
 if(!isNumeric)
 {
+		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
     QMessageBox::warning(this, "Warning !", "yaw is not a valid number - the transformation cannot be applied !");
- 		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 		return;
 }
 double xT = 0;
 xT = ui->lineEdit_xT->text().toDouble(&isNumeric);
 if(!isNumeric)
 {
+		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
     QMessageBox::warning(this, "Warning !", "x is not a valid number - the transformation cannot be applied !");
- 		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 		return;
 }
 double yT = 0;
 yT = ui->lineEdit_yT->text().toDouble(&isNumeric);
 if(!isNumeric)
 {
+		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
     QMessageBox::warning(this, "Warning !", "y is not a valid number - the transformation cannot be applied !");
- 		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 		return;
 }
 double zT = 0;
 zT = ui->lineEdit_zT->text().toDouble(&isNumeric);
 if(!isNumeric)
 {
+		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
     QMessageBox::warning(this, "Warning !", "z is not a valid number - the transformation cannot be applied !");
- 		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 		return;
 }
 
 if (!ui->checkBox_applyTransformation->isChecked())
 {
 Eigen::Affine3f axis_transformation = pcl::getTransformation (xT, yT, zT, pcl::deg2rad(roll), pcl::deg2rad(pitch), pcl::deg2rad(yaw));
-pcl::transformPointCloud(*cloud, *cloud, axis_transformation);
+pcl::transformPointCloud(*m_cloud, *m_cloud, axis_transformation);
 }
 else
 {
     m_transformation = pcl::getTransformation (xT, yT, zT, pcl::deg2rad(roll), pcl::deg2rad(pitch), pcl::deg2rad(yaw));
+		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
     QMessageBox::information(this, "Information !", " the transformation matrix will be applied to all loaded points cloud !");
 }
 
    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-viewer->updatePointCloud (cloud, "cloud");
+viewer->updatePointCloud (m_cloud, "cloud");
 ui->qvtkWidget->update ();
 }
 
@@ -718,9 +751,9 @@ for (float y=-0.5f; y<=0.5f; y+=0.05f)
  QApplication::restoreOverrideCursor();    //transform the cursor for waiting mode
 
 	QMessageBox::warning(this, "Warning !", "Surface created");
-	pcl::copyPointCloud(*surface,*cloud);
+	pcl::copyPointCloud(*surface,*m_cloud);
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-	viewer->updatePointCloud (cloud, "cloud");
+	viewer->updatePointCloud (m_cloud, "cloud");
 	ui->qvtkWidget->update ();
 }
 
@@ -751,7 +784,7 @@ void PCL_upd_DEMO::runUPD()
 		applyTransformation();
 	}
 
-	pcl::copyPointCloud(*cloud, *cloud_filtered);
+	pcl::copyPointCloud(*m_cloud, *m_cloud_filtered);
 	removeFilters();
 	
 	if (ui->checkBox_applyPTF->isChecked() )applyPassthrogh();
@@ -760,7 +793,7 @@ void PCL_upd_DEMO::runUPD()
 
 	if (ui->checkBox_applyVox->isChecked()) applyVoxelization();
 
-	m_upd->setInputCloud(cloud_filtered);
+	m_upd->setInputCloud(m_cloud_filtered);
 	m_upd->setFlip(ui->checkBox_filpNormals->isChecked());
 
 	if (ui->radioButton_kNeighbors->isChecked())
@@ -808,18 +841,18 @@ void PCL_upd_DEMO::switchVisualization()
 	
 	if(!ui->checkBox_visTraversability->isChecked()) 
 	{    
-		viewer->updatePointCloud (cloud, "cloud");
+		viewer->updatePointCloud (m_cloud, "cloud");
 		ui->qvtkWidget->update ();
 	}
 	else
 	{
-		m_upd->getAsColorMap(   cloud_color_UPD,
+		m_upd->getAsColorMap(   m_cloud_color_UPD,
 								ui->lcdNumber_unevenness->value()/ui->horizontalSlider_unevennessIndex->maximum(),
 								pcl::deg2rad(ui->lcdNumber_thresholdAngle->value()));
 		viewer->removePointCloud();
-		viewer->addPointCloud (cloud_color_UPD, "cloud");
+		viewer->addPointCloud (m_cloud_color_UPD, "cloud");
         viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-		viewer->updatePointCloud (cloud_color_UPD, "cloud");
+		viewer->updatePointCloud (m_cloud_color_UPD, "cloud");
 		ui->qvtkWidget->update ();
 	}
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
@@ -874,13 +907,166 @@ PCL_upd_DEMO::pp_callback ( pcl::visualization::PointPickingEvent& event, void* 
     return;
   PointT current_point;
   event.getPoint(current_point.x, current_point.y, current_point.z);
-  data->clicked_points_3d->points.push_back(current_point);
+  data->m_clicked_points_3d->points.push_back(current_point);
   // Draw clicked points in red:
-  pcl::visualization::PointCloudColorHandlerCustom<PointT> red (data->clicked_points_3d, 255, 0, 0);
+  pcl::visualization::PointCloudColorHandlerCustom<PointT> red (data->m_clicked_points_3d, 255, 0, 0);
   data->viewerPtr->removePointCloud("clicked_points");
-  data->viewerPtr->addPointCloud(data->clicked_points_3d, red, "clicked_points");
+  data->viewerPtr->addPointCloud(data->m_clicked_points_3d, red, "clicked_points");
   data->viewerPtr->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "clicked_points");
   std::cout << current_point.x << " " << current_point.y << " " << current_point.z << std::endl;
+}
+
+
+void PCL_upd_DEMO::startStopLabelling()
+{
+	if (ui->horizontalSlider_p->value() != 1 )    //set the visualization to the minimum point size if not already done --- only for visualization
+	{ 
+		ui->horizontalSlider_p->setValue(1);
+		pSliderValueChanged(1);
+	}
+
+	if (_labelled_paused == true)
+	{
+	ui->pushButton_start_stopLabelling->setEnabled(false);
+	ui->pushButton_start_stopLabelling->setText("Start/Stop Labelling");	
+	_labelled_paused = false;
+	}
+
+	if (_label_counter == 0 && _labelled_paused == false)     // the first step --- deactivate button for manual labelling - activate ground and not ground  ---- then set the visualization properties
+	{ 
+		//QMessageBox::information(this, "info !", " Manual labelling procedure starting !");
+
+		ui->pushButton_start_stopLabelling->setEnabled(false);
+		ui->pushButton_ground->setEnabled(true);
+		ui->pushButton_notGround->setEnabled(true);
+
+		m_labeled_point->clear();
+		m_labeled_point->push_back( m_cloud->at(_label_counter));
+
+		viewer->addPointCloud(m_labeled_point, "label_point",0);
+		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "label_point");   //5 is for bigger size - in this way the point is enphasized
+		_label_counter++;
+		return;
+	}
+
+
+	if (_label_counter < m_cloud->size() && _labelled_paused == false)
+	{   
+		m_labeled_point->clear();
+		m_labeled_point->push_back( m_cloud->at(_label_counter));
+
+		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "label_point");   //5 is for bigger size - in this way the point is enphasized
+		viewer->updatePointCloud (m_labeled_point, "label_point");
+		viewer->updatePointCloud (m_cloud, "cloud");
+		ui->qvtkWidget->update ();
+		_label_counter++;
+		return;
+	}
+
+}
+
+
+void PCL_upd_DEMO::labelGround()
+{
+	 if (_label_counter < m_cloud->size())	
+	 { 
+		 m_labeled_cloud->push_back(m_labeled_point->at(0));
+ 		 m_labeled_cloud->at(m_labeled_cloud->size()-1).rgba = 0x0000FF00;
+ 		 m_cloud->at(_label_counter-1).rgba = 0x0000FF00;
+//		 cout << "PCL_upd_DEMO::labelGround:: MESSAGE --- ground --- x " << m_labeled_point->at(0).x << " y " << m_labeled_point->at(0).y << " z " << m_labeled_point->at(0).z << endl;
+		
+		 stringstream ss;
+		 ss << " x " << m_labeled_point->at(0).x << ", y = " << m_labeled_point->at(0).y << ", z =" << m_labeled_point->at(0).z;
+		 QTreeWidgetItem * item = new QTreeWidgetItem();   // and update the widget for the visualization
+		 item->setText(1,QString::fromStdString(ss.str()));
+		 item->setText(0,"Ground");
+		 ui->treeWidget_classification->insertTopLevelItem(0,item);
+		 
+		 startStopLabelling();
+	 }
+	 else //this is the last step!
+	 {
+		m_labeled_cloud->push_back(m_labeled_point->at(0));
+		m_labeled_cloud->at(m_labeled_cloud->size()-1).rgba = 0x0000FF00;
+		m_cloud->at(_label_counter-1).rgba = 0x0000FF00;
+	 	ui->pushButton_start_stopLabelling->setEnabled(true);
+		ui->pushButton_ground->setEnabled(false);
+		ui->pushButton_notGround->setEnabled(false);
+		QMessageBox::information(this, "info !", " Congratulation you labeled all cloud !!");
+
+	 }
+
+}
+
+void PCL_upd_DEMO::labelNotGround()
+{
+	 if (_label_counter < m_cloud->size())	
+	 { 
+		 
+		 m_labeled_cloud->push_back(m_labeled_point->at(0));
+ 		 m_labeled_cloud->at(m_labeled_cloud->size()-1).rgba = 0x00FF0000;
+		 m_cloud->at(_label_counter-1).rgba = 0x00FF0000;
+//		 cout << "PCL_upd_DEMO::labelGround:: MESSAGE --- not ground --- x " << m_labeled_point->at(0).x << " y " << m_labeled_point->at(0).y << " z " << m_labeled_point->at(0).z << endl;
+
+		 stringstream ss;
+		 ss << " x " << m_labeled_point->at(0).x << ", y = " << m_labeled_point->at(0).y << ", z =" << m_labeled_point->at(0).z;
+		 QTreeWidgetItem * item = new QTreeWidgetItem();   // and update the widget for the visualization
+		 item->setText(1,QString::fromStdString(ss.str()));
+		 item->setText(0,"NOT Ground");
+		 ui->treeWidget_classification->insertTopLevelItem(0,item);
+		 
+		 startStopLabelling(); 
+
+	 }
+	 else //this is the last step!
+	 {		
+		m_labeled_cloud->push_back(m_labeled_point->at(0));
+ 		m_labeled_cloud->at(m_labeled_cloud->size()-1).rgba = 0x00FF0000;
+		m_cloud->at(_label_counter-1).rgba = 0x00FF0000;
+	 	ui->pushButton_start_stopLabelling->setEnabled(true);
+		ui->pushButton_ground->setEnabled(false);
+		ui->pushButton_notGround->setEnabled(false);
+		QMessageBox::information(this, "info !", " Congratulation you labeled all cloud !!");
+	 }
+}
+
+void PCL_upd_DEMO::selectPointLabel()
+{
+	ui->pushButton_start_stopLabelling->setEnabled(true);
+	ui->pushButton_start_stopLabelling->setText("Continue ...");
+
+	_labelled_paused = true;
+
+
+	int _index = ui->treeWidget_classification->indexOfTopLevelItem(ui->treeWidget_classification->currentItem());      // takes the index from the listWidget selected row and read the cloud
+	m_labeled_point->push_back( m_cloud->at(_index));
+
+	viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "label_point");   //5 is for bigger size - in this way the point is enphasized
+	viewer->updatePointCloud (m_labeled_point, "label_point");
+	viewer->updatePointCloud (m_cloud, "cloud");
+	ui->qvtkWidget->update ();
+
+
+
+
+
+}
+
+
+
+
+void PCL_upd_DEMO::clearLabelling()
+{
+
+	m_labeled_point->clear();
+	m_labeled_cloud->clear();
+	ui->treeWidget_classification->clear();
+	 	ui->pushButton_start_stopLabelling->setEnabled(true);
+		ui->pushButton_ground->setEnabled(false);
+		ui->pushButton_notGround->setEnabled(false);
+		_label_counter=0;
+		QMessageBox::information(this, "info !", " Cleared !!");
+
 }
 
 

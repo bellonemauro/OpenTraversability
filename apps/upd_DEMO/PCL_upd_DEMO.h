@@ -67,7 +67,7 @@ public:
 
     void m_try();
 
-public slots:
+private slots:
  /** change the point size dimension for the visualization
    * \note 
    */
@@ -126,6 +126,12 @@ public slots:
   void
   setSaveFolder();
 
+  /** save labeled cloud
+   * \note 
+   */
+  void
+  saveLabeledFile();
+
   /** update the visualizer on doubleclick on the file list
  * \note
  */
@@ -174,8 +180,40 @@ public slots:
   void 
   setRadiusOrKNeighborsMethod();
 
+  /** Start and stop a manual labeling procedure
+  * the procedure allows to label as grund or not ground an intere scenario using point by point labelling
+  * \note
+  */
+  void
+  startStopLabelling();
 
- /** set flip
+  /** Label the point as "GROUND"
+  *   it just copy the point that is enphazed in the cloud in the labeled set
+  * \note
+  */
+  void 
+  labelGround();
+
+  /** Label the point as "NOT GROUND"
+  *   it just copy the point that is enphazed in the cloud in the labeled set
+  * \note
+  */
+  void
+  labelNotGround();
+
+  /** Allows the user to select a point in the labeled point list and correct its value
+    *
+	**/
+  void
+  selectPointLabel();
+
+  /** clear the last labelling session
+    *
+	**/
+  void 
+  clearLabelling ();
+
+  /** set flip
  * \note
  */
   void 
@@ -216,14 +254,18 @@ protected:
   void pp_callback ( pcl::visualization::PointPickingEvent& event, void* args);	
 	
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-  PointCloudT::Ptr cloud;           			//--> allocate a cloud for visualization and data processing
-  PointCloudT::Ptr cloud_filtered;  			//--> allocate a cloud for filtering
-  PointCloudT::Ptr cloud_color_UPD;             //--> allocate a cloud for visualization and data processing
-  PointCloudT::Ptr clicked_points_3d;// (new PointCloudT);
+  PointCloudT::Ptr m_cloud;           			//--> allocate a cloud for visualization and data processing
+  PointCloudT::Ptr m_cloud_filtered;  			//--> allocate a cloud for filtering
+  PointCloudT::Ptr m_cloud_color_UPD;           //--> allocate a cloud for visualization and data processing
+  PointCloudT::Ptr m_labeled_cloud;				//--> labeled cloud - a colored cloud is used to label ground and not ground - green = ground --- red = NOT ground 
+  PointCloudT::Ptr m_clicked_points_3d;         //--> single point to detect a click in the visualizer
+  PointCloudT::Ptr m_labeled_point;             //--> single point to show a point that can be labels - see function for more details
+
+
+
 
   upd *m_upd;
   pcl::PointCloud<pcl::PointSurfel>::Ptr UPD_cloud;     //--> processed cloud
-
   Eigen::Affine3f m_transformation;             //--> transformation matrix
   
   QString m_path_to_pcd_list;      //--> container for the filename list, it is expected for the user to link a list of pcd files
@@ -236,11 +278,12 @@ protected:
   unsigned int red;
   unsigned int green;
   unsigned int blue;
-
+  unsigned int _label_counter;
+  bool _labelled_paused;
 
   struct callback_args{
   // structure used to pass arguments to the callback function
-  PointCloudT::Ptr clicked_points_3d;
+  PointCloudT::Ptr m_clicked_points_3d;
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewerPtr;
   //callback_args(pcl::visualization::PointPickingEvent& , callback_args){}
   //pcl::visualization::PCLVisualizer::Ptr viewerPtr;
