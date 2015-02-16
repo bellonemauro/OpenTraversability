@@ -131,7 +131,7 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   //cb_args.m_clicked_points_3d = m_clicked_points_3d;
   //cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);//pcl::visualization::PCLVisualizer::Ptr(viewer);
   //viewer->registerPointPickingCallback (PCL_upd_DEMO::pp_callback, (void*)&cb_args);
-  std::cout << "Shift+click on three floor points, then press 'Q'..." << std::endl;
+  //std::cout << "Shift+click on three floor points, then press 'Q'..." << std::endl;
 
   pSliderValueChanged (2);
   viewer->resetCamera ();
