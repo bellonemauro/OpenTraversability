@@ -942,9 +942,10 @@ void PCL_upd_DEMO::startStopLabelling()
 
 		m_labeled_point->clear();
 		m_labeled_point->push_back( m_cloud->at(_label_counter));
+		m_labeled_point->at(0).rgba = 0x00FF00FF;
 
 		viewer->addPointCloud(m_labeled_point, "label_point",0);
-		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "label_point");   //5 is for bigger size - in this way the point is enphasized
+		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 7, "label_point");   //5 is for bigger size - in this way the point is enphasized
 		_label_counter++;
 		return;
 	}
@@ -954,8 +955,9 @@ void PCL_upd_DEMO::startStopLabelling()
 	{   
 		m_labeled_point->clear();
 		m_labeled_point->push_back( m_cloud->at(_label_counter));
+		m_labeled_point->at(0).rgba = 0x00FF00FF;
 
-		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "label_point");   //5 is for bigger size - in this way the point is enphasized
+		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 7, "label_point");   //5 is for bigger size - in this way the point is enphasized
 		viewer->updatePointCloud (m_labeled_point, "label_point");
 		viewer->updatePointCloud (m_cloud, "cloud");
 		ui->qvtkWidget->update ();
@@ -1041,7 +1043,7 @@ void PCL_upd_DEMO::selectPointLabel()
 	int _index = ui->treeWidget_classification->indexOfTopLevelItem(ui->treeWidget_classification->currentItem());      // takes the index from the listWidget selected row and read the cloud
 	m_labeled_point->push_back( m_cloud->at(_index));
 
-	viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "label_point");   //5 is for bigger size - in this way the point is enphasized
+	viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 7, "label_point");   //5 is for bigger size - in this way the point is enphasized
 	viewer->updatePointCloud (m_labeled_point, "label_point");
 	viewer->updatePointCloud (m_cloud, "cloud");
 	ui->qvtkWidget->update ();

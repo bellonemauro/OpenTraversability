@@ -162,9 +162,9 @@
       <property name="currentIndex">
        <number>5</number>
       </property>
-      <widget class="QWidget" name="PointsCloud">
+      <widget class="QWidget" name="PointClouds">
        <attribute name="title">
-        <string>Points cloud</string>
+        <string>Point clouds</string>
        </attribute>
        <widget class="QListWidget" name="listWidget_pcdNames">
         <property name="geometry">
@@ -1527,7 +1527,7 @@
       </widget>
       <widget class="QWidget" name="classifier">
        <attribute name="title">
-        <string>Terrain Classifier</string>
+        <string>Manual Labelling</string>
        </attribute>
        <widget class="QPushButton" name="pushButton_start_stopLabelling">
         <property name="geometry">
@@ -1777,7 +1777,7 @@
   </action>
   <action name="actionOpen_cloud">
    <property name="text">
-    <string>Points Cloud</string>
+    <string>Point Cloud</string>
    </property>
   </action>
   <action name="actionRemove_Filters">
