@@ -73,25 +73,15 @@ endif(MSVC AND ENABLE_setLocalDebugEnvironment)
 # add all libraries in the /libs folder
 add_subdirectory(libs) 
 
-# --------------------------------------
-#  upd_lib 
-# --------------------------------------
+# -----------  upd_lib  --------------------
+include_directories("${upd_lib_INCLUDE_DIR}")   
 
-	#add_subdirectory(libs/upd_lib)
-	set (upd_lib_INCLUDE_DIR ${upd_lib_SOURCE_DIR}/include )
-	include_directories("${upd_lib_INCLUDE_DIR}")   
-
-
-# --------------------------------------
-#  apps
-# --------------------------------------
+# -------------------- apps --------------------------------
 OPTION(ENABLE_BUILD_apps "Option for building apps - ON by default" ON)
 if (ENABLE_BUILD_apps)
 	add_subdirectory(apps)
 endif(ENABLE_BUILD_apps)
-# --------------------------------------
-#  apps 
-# --------------------------------------
+
 
 # --------------------------------------
 #  settings for install and package --- not supported yet

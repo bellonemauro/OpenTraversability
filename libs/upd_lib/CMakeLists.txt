@@ -28,6 +28,7 @@ add_library(${PROJECT_NAME}  SHARED ${LIB_SOURCES} ${LIB_HEADERS} )
 
 # set the postfix _d for debug libraries 
 set_target_properties(${PROJECT_NAME}  PROPERTIES DEBUG_POSTFIX "_d")
+set (upd_lib_INCLUDE_DIR ${upd_lib_SOURCE_DIR}/include CACHE PATH "Path to the headers of upd_lib")
 
 add_definitions(-DUPD_LIBRARY) 
 	
