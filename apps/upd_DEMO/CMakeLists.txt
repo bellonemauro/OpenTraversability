@@ -23,9 +23,13 @@ find_package ( VTK REQUIRED)
 # --------------------------------------
 #  set variables for compilation 
 # --------------------------------------
-set  (PCL_upd_DEMO_SOURCES ${PCL_upd_DEMO_SOURCE_DIR}/main.cpp ${PCL_upd_DEMO_SOURCE_DIR}/PCL_upd_DEMO.cpp) 	# sources
-set  (PCL_upd_DEMO_HEADERS ${PCL_upd_DEMO_SOURCE_DIR}/PCL_upd_DEMO.h)	   			# headers
-set  (PCL_upd_DEMO_FORMS   ${PCL_upd_DEMO_SOURCE_DIR}/PCL_upd_DEMO.ui)				# graphical interface
+# select all headers in the include dir
+FILE(GLOB PCL_upd_DEMO_HEADERS "${PCL_upd_DEMO_SOURCE_DIR}/*.h")   
+# select all sources in the include dir
+FILE(GLOB PCL_upd_DEMO_SOURCES "${PCL_upd_DEMO_SOURCE_DIR}/*.cpp")  
+# select all files for the graphical interface
+FILE(GLOB PCL_upd_DEMO_FORMS "${PCL_upd_DEMO_SOURCE_DIR}/*.ui")  
+
 set  (VTK_LIBRARIES )# vtkRendering vtkGraphics vtkHybrid QVTK)  #--> the specific libraries are not necessary in VTK6.1
 
 QT4_WRAP_CPP (PCL_upd_DEMO_HEADERS_MOC   ${PCL_upd_DEMO_HEADERS})
@@ -34,6 +38,7 @@ QT4_WRAP_UI  (PCL_upd_DEMO_FORMS_HEADERS ${PCL_upd_DEMO_FORMS})
 
 # this is necessary to find in the code the ui____.h file built in the build folder
 include_directories(${PCL_upd_DEMO_BINARY_DIR}) 
+include_directories(${upd_lib_INCLUDE_DIR}) 
 
 # --------------------------------------
 #  link external libraries
