@@ -3,7 +3,7 @@
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
 set (CPACK_NSIS_MODIFY_PATH "ON")
-set (_WEBSITE "https://sites.google.com/site/bellonemauro")
+set (_WEBSITE "https://www.maurobellone.com")
 set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set (CPACK_PACKAGE_VERSION "${CMAKE_OTA_FULL_VERSION}")
 
