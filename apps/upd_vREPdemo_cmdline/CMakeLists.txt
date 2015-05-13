@@ -53,6 +53,6 @@ message (STATUS "Boost_LIBRARIES :: ${Boost_LIBRARIES}" )
 						
 # allows folders for MSVC
 if (MSVC AND ENABLE_SOLUTION_FOLDERS) 
-	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "apps")
+	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Apps")
 endif (MSVC AND ENABLE_SOLUTION_FOLDERS)	
 					
