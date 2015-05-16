@@ -15,6 +15,9 @@
 // Start the server from a child script with following command:
 // simExtRemoteApiStart(portNumber) -- starts a remote API server service on the specified port
 
+// modified by Eric Rohmer and Mauro Bellone
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -37,6 +40,9 @@ extern "C" {
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/filters/passthrough.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/console/parse.h>
 
 #include <iostream>
 #include <Eigen/Dense>
@@ -50,6 +56,7 @@ pcl::PointCloud<pcl::PointSurfel>::Ptr output_cloud;// (new pcl::PointCloud<pcl:
  int user_data;
 
 
+ 
  void
  viewerOneOff (pcl::visualization::PCLVisualizer& viewer)
  {
@@ -78,12 +85,71 @@ int main(int argc,char* argv[])
 {
 	int portNb=19999;
 
+    // parsing arguments
+
+	bool _activate_viewer = true;
+	bool _verbose = false;
+	double unevenness_treshold = 0.99;
+	double max_climbing_angle = 13;
+	double search_radius = 0.3;   //this is something we can discuss and maybe change from V-Rep
+
+
+	if (pcl::console::find_argument (argc, argv, "-verbose") >= 0)   // -nv --> no viewer
+   {
+	   _verbose = true;
+
+   }
+	if (pcl::console::find_argument (argc, argv, "-nv") >= 0)   // -nv --> no viewer
+   {
+	   _activate_viewer = false;
+
+   }
+	if (pcl::console::parse (argc, argv, "-ut", unevenness_treshold) >= 0)   // -ut set the unevenness treshold
+	{
+		cout << "set unevenness_treshold to " << unevenness_treshold << " " << endl; 
+	}
+	else{
+		cout << "no unevenness_treshold set, using default value " << unevenness_treshold << " " << endl; 
+	}
+
+	if (pcl::console::parse (argc, argv, "-ca", max_climbing_angle) >= 0)   // -ca set the climbing angle
+	{
+		cout << "set max_climbing_angle to " << max_climbing_angle << " deg" << endl; 
+	}
+	else {
+		cout << "sno et max_climbing_angle set, using default value" << max_climbing_angle << " deg" << endl; 
+	}
+	if (pcl::console::parse (argc, argv, "-sr", search_radius) >= 0)   // -sr set the search radius
+	{
+		cout << "set search_radius to " << search_radius << " m" << endl; 
+	}
+	else {
+		cout << "no search_radius set, using default value " << search_radius << " m" << endl; 
+	}
+
+
+	if (pcl::console::find_argument (argc, argv, "-h") >= 0)
+   {
+     std::cout<<"\n Help ... please refer to this help for application usage\n\n"<<std::endl;
+     std::cout<<"-nv --> no viewer \n"<<std::endl;
+     std::cout<<"-ca set the climbing angle in [deg]  \n"<<std::endl;
+     std::cout<<"-sr set the search radius in [m] \n"<<std::endl;
+     std::cout<<"-ut set the unevenness treshold \n"<<std::endl;
+    return 0;
+   }
+
+
+
 //initialize the cloud and the viewer
 input_cloud.reset (new pcl::PointCloud<pcl::PointXYZRGBA>);   // define a my cloud
 output_cloud.reset( new pcl::PointCloud<pcl::PointSurfel>);
 pcl::visualization::CloudViewer viewer("Cloud Viewer");
-viewer.runOnVisualizationThreadOnce (viewerOneOff);
-viewer.runOnVisualizationThread (viewerPsycho);
+
+if (_activate_viewer == true)
+{
+	viewer.runOnVisualizationThreadOnce (viewerOneOff);
+	viewer.runOnVisualizationThread (viewerPsycho);
+}
 
 	int clientID=simxStart((simxChar*)"127.0.0.1",portNb,true,true,2000,5);
 	if (clientID!=-1)
@@ -108,6 +174,15 @@ viewer.runOnVisualizationThread (viewerPsycho);
 		simxFloat posk[3],orik[3]; //ground truth of the kinect position and orientation in intertial frame
 		simxFloat H_laserFrame_in_wheelchairFrame[3][4]; //tranformation matrix (warning:3x4 and not 4x4) of the laserFrame expressed in the wheelchairFrame
 		simxFloat H_kinectFrame_in_wheelchairFrame[3][4]; //tranformation matrix (warning:3x4 and not 4x4) of the kinectFrame expressed in the wheelchairFrame
+
+
+		simxFloat laserFramePosition[3];
+        simxGetObjectPosition(clientID,laserFrameHandle,-1,laserFramePosition,simx_opmode_oneshot_wait);
+        std::cout<<"####################################### laser height "<<laserFramePosition[2]<<std::endl;
+
+        simxFloat kinectFramePosition[3];
+        simxGetObjectPosition(clientID,kinectFrameHandle,-1,kinectFramePosition,simx_opmode_oneshot_wait);
+        std::cout<<"####################################### kinect height "<<kinectFramePosition[2]<<std::endl;
 
 		simxFloat (*pointcloud)[3];
 
@@ -220,7 +295,7 @@ viewer.runOnVisualizationThread (viewerPsycho);
 		upd *my_upd= new upd ();      // define an object from my library which is the UPD
 		//my_upd->setFlip(true);        //set a flipping function to true, just a configuration 
 		//my_upd->setViewPoint(Eigen::Vector3d(0, 0, 0));
-		double search_radius = 0.4;   //this is something we can discuss and maybe change from V-Rep
+
 		my_upd->setSearchRadius(search_radius);  // send the search radius to the UPD object
 		pcl::PassThrough<pcl::PointXYZRGBA> pass;
 		pass.setInputCloud (input_cloud);
@@ -353,15 +428,15 @@ viewer.runOnVisualizationThread (viewerPsycho);
 				my_upd->runUPD_radius();				// run the upd
 				
 				duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-				std::cout << "UPD processed in " << duration << endl;
+				cout << "UPD processed in " << duration << endl;
 
 				output_cloud = my_upd->getUPD( );          // get ther result
 
-				double unevenness_treshold = 0.99;
-				double max_climbing_angle = 45;
+
 
 				my_upd->getAsColorMap(   input_cloud, unevenness_treshold, max_climbing_angle);
-				viewer.showCloud(input_cloud, "cloud");
+
+
 				/*int cpt=0;
 				for (int i=0;i<input_cloud->size();i++){
 					
@@ -376,7 +451,100 @@ viewer.runOnVisualizationThread (viewerPsycho);
 				simxFloat accessible=0.;
 
                 // SIMPLE TEST FOR COLOR : TO REMOVE
-                if (sqrt((xl-xc)*(xl-xc)+(yl-yc)*(yl-yc))< 3) accessible=1.;
+
+
+				simxFloat H_laserFrame_in_kinectFrame[3][4];
+
+				//get the transformation matrix of the kinect in the wheelchair frame
+				simxGetStringSignal(clientID,"TransfLaserFrameInKinectFrame",&data,&dataSize,simx_opmode_oneshot_wait);
+				////simxClearStringSignal(clientID,"TransfkinectFrameInWheelchairFrame",simx_opmode_oneshot);
+				if ( _verbose == true) printf("H_laserFrame_in_kinectFrame\n");
+
+				for(int j=0;j<3;j++){
+					for(int i=0;i<4;i++){
+						H_laserFrame_in_kinectFrame[j][i]=((simxFloat*)data)[j*4+i];
+						if (_verbose == true) printf("%1.2f\t",H_laserFrame_in_kinectFrame[j][i]);
+						if ((j*4+i)==3 && _verbose == true) printf("\n");
+						if ((j*4+i)==7 && _verbose == true) printf("\n");
+						if ((j*4+i)==11 && _verbose == true) printf("\n0\t0\t0\t1\n");
+					}
+				}
+
+
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				// I receive xc,yc,thc current position of the chair and xl
+				// yl are the coordinates of the laser beam on the ground in the worldframe
+				// isTarget is not used right now
+				// xl_kinect and yl_kinect are the coordinates of the laser beam on the ground in kinect's frame
+
+				simxFloat xl_kinect, yl_kinect;
+
+				if (simxReadStringStream(clientID,"fromVREP",&data,&dataSize,simx_opmode_buffer)==simx_return_ok){
+					xc=((simxFloat*)data)[0];
+					yc=((simxFloat*)data)[1];
+					thc=((simxFloat*)data)[2];
+					xl=((simxFloat*)data)[3];
+					yl=((simxFloat*)data)[4];
+					isTarget=((simxFloat*)data)[5];
+					xl_kinect=((simxFloat*)data)[6];
+					yl_kinect=((simxFloat*)data)[7];
+
+				   // printf("xc= %1.3f yc=%1.3f thc=%1.3f xl=%1.3f yl=%1.3f isTarget=%i xl_kinect=%1.3f yl_kinect=%1.3f\n",xc,yc,thc*180./M_PI,xl,yl,(int)isTarget,xl_kinect,yl_kinect);
+
+				}
+
+
+
+				   int m_k_neighbors=1;   //i need only the closest point
+				   vector<int> pointIdxNKNSearch(m_k_neighbors);
+				   vector<float> pointNKNSquaredDistance(m_k_neighbors);
+				   pcl::PointXYZRGBA searchPoint;
+				   float _angle = thc - M_PI/2;
+				   searchPoint.x = -xl_kinect;
+				   searchPoint.y = 0;
+				   searchPoint.z = yl_kinect;
+
+   				   if ( _verbose == true)
+					{
+					cout << "laser absolute coordinates xl = " << xl << " yl = "<< yl << endl;
+				   cout << "chair coordinates xc = " << xc << " yc = "<< yc << " theta c " << thc << endl;
+				   cout << "Laser point xl = " << searchPoint.x << " yl = "<< searchPoint.z << endl;
+				   }
+
+				   pcl::KdTreeFLANN<pcl::PointXYZRGBA> kdtree;
+				   kdtree.setInputCloud (input_cloud);
+				   if ( kdtree.nearestKSearch (searchPoint, m_k_neighbors, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 ) cout << "Index found : " << pointIdxNKNSearch[0] << " pointNKNSquaredDistance " << pointNKNSquaredDistance[0] << "\n" << endl; //m_k_neighbors=1; //TODO fix here
+
+						pcl::PointXYZRGBA _Point;
+						_Point.x = input_cloud->points[pointIdxNKNSearch[0]].x;
+						_Point.y = input_cloud->points[pointIdxNKNSearch[0]].y;
+						_Point.z = input_cloud->points[pointIdxNKNSearch[0]].z;
+						_Point.rgba =  input_cloud->points[pointIdxNKNSearch[0]].rgba;
+
+						input_cloud->points[pointIdxNKNSearch[0]].rgba = 0x0000FF;
+
+						if ( _Point.g > 250 && pointNKNSquaredDistance[0] < 0.2 )
+						{
+						accessible=1;
+						if ( _verbose == true)
+						{
+						cout << "analysed accessible point x = " << _Point.x << " y = " << _Point.y << " z = " << _Point.z << " rgba = " << std::hex << _Point.rgba << " . " << endl;
+						cout << "ACCESSIBLE POINT" << endl;
+						}
+						}
+						else {
+							if ( _verbose == true)
+							{
+							cout << "analysed NOT accessible point x = " << _Point.x << " y = " << _Point.y << " z = " << _Point.z << " rgba = " << std::hex << _Point.rgba << " . " << endl;
+							cout << "NOT ACCESSIBLE POINT" << endl;
+							}
+						}
+
+				if (_activate_viewer == true)
+				{
+				viewer.showCloud(input_cloud, "cloud");
+				}
+				//if (sqrt((xl-xc)*(xl-xc)+(yl-yc)*(yl-yc))< 3) accessible=1.;
                 //END SIMPLE TEST
 
                 // accessible=0 or accessible =1, depending on your traversability map.
@@ -407,6 +575,10 @@ viewer.runOnVisualizationThread (viewerPsycho);
 		//delete[] img,imgRGB,data;
 		simxFinish(clientID);
 	} 
+	else 
+	{
+		cout << " no connection found, closing ...." << endl;
+	}
 
 
 	return(0);
