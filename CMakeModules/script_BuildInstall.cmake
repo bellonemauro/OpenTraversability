@@ -11,6 +11,8 @@ FILE(GLOB INTERNAL_DLL "${PROJECT_BINARY_DIR}/bin/Release/*.dll")
 			INSTALL(FILES "${F}" DESTINATION bin)
 		ENDFOREACH(F)
 
+INSTALL(FILES "${PROJECT_SOURCE_DIR}/apps/upd_vREPdemo_cmdline/wheelchairLaserNav.1.2.ttt" DESTINATION ./)		
+
 # This looks for all .dll in QT library, 
 # it's of for installers but maybe allow the choice of necessary dlls only is mandatory for the sake of space saving
 
