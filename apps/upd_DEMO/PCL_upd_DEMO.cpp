@@ -73,18 +73,18 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   ui->qvtkWidget->update ();
 
   // actions from menu
-  connect (ui->actionOpen_list, SIGNAL(activated()), this, SLOT(openFileList()));
-  connect (ui->actionOpen_cloud, SIGNAL(activated()), this, SLOT(openFile()));
-  connect (ui->actionOpen_Image, SIGNAL(activated()), this, SLOT(openImage()));
-  connect (ui->actionOpen_Images_List, SIGNAL(activated()), this, SLOT(openImageList()));
-  connect (ui->actionOpen_PCDFolder, SIGNAL(activated()), this, SLOT(openPCDFolder()));
-  connect (ui->actionImages_Folder, SIGNAL(activated()), this, SLOT(openImagesFolder()));
-  connect (ui->actionSave_Cloud, SIGNAL(activated()), this, SLOT(saveFile()));
-  connect (ui->actionSave_UPD, SIGNAL(activated()), this, SLOT(saveUPDFile()));
-  connect (ui->actionLabelled_Cloud, SIGNAL(activated()), this, SLOT(saveLabeledFile()));
-  connect (ui->actionAbout, SIGNAL(activated()), this, SLOT (about()));
-  connect (ui->actionRemove_Filters, SIGNAL(activated()), this, SLOT(removeFilters()) );
-  connect (ui->actionGenerate_sample_cloud, SIGNAL(activated()), this, SLOT(GenerateSampleCloud()));
+  connect (ui->actionOpen_list, SIGNAL(triggered()), this, SLOT(openFileList()));
+  connect (ui->actionOpen_cloud, SIGNAL(triggered()), this, SLOT(openFile()));
+  connect (ui->actionOpen_Image, SIGNAL(triggered()), this, SLOT(openImage()));
+  connect (ui->actionOpen_Images_List, SIGNAL(triggered()), this, SLOT(openImageList()));
+  connect (ui->actionOpen_PCDFolder, SIGNAL(triggered()), this, SLOT(openPCDFolder()));
+  connect (ui->actionImages_Folder, SIGNAL(triggered()), this, SLOT(openImagesFolder()));
+  connect (ui->actionSave_Cloud, SIGNAL(triggered()), this, SLOT(saveFile()));
+  connect (ui->actionSave_UPD, SIGNAL(triggered()), this, SLOT(saveUPDFile()));
+  connect (ui->actionLabelled_Cloud, SIGNAL(triggered()), this, SLOT(saveLabeledFile()));
+  connect (ui->actionAbout, SIGNAL(triggered()), this, SLOT (about()));
+  connect (ui->actionRemove_Filters, SIGNAL(triggered()), this, SLOT(removeFilters()) );
+  connect (ui->actionGenerate_sample_cloud, SIGNAL(triggered()), this, SLOT(GenerateSampleCloud()));
 
 
   //buttons
