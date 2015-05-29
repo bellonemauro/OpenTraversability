@@ -20,7 +20,7 @@ include_directories(${Boost_LIBRARY_DIR})
 include_directories(${Boost_INCLUDE_DIRS})
 # necessary to allow the *.cpp to find headers 
 include_directories(${upd_lib_INCLUDE_DIR})
-include_directories(${upd_vREPdemo_SOURCE_DIR}/include) 
+include_directories(${upd_vREPdemo_cmdline_SOURCE_DIR}/include) 
 include_directories(${VrepRemoteApi_INCLUDE_DIR})
 message(STATUS " including VrepRemoteApi_BINARY_DIR  :: ${VrepRemoteApi_BINARY_DIR}" )
 
@@ -28,9 +28,9 @@ message(STATUS " including VrepRemoteApi_BINARY_DIR  :: ${VrepRemoteApi_BINARY_D
 #  set variables for compilation 
 # --------------------------------------
 
-FILE(GLOB upd_vREPdemo_SOURCES "${upd_vREPdemo_SOURCE_DIR}/*.cpp") 
+FILE(GLOB upd_vREPdemo_SOURCES "${upd_vREPdemo_cmdline_SOURCE_DIR}/*.cpp") 
 #select all headers in the include dir
-FILE(GLOB upd_vREPdemo_HEADERS "${upd_vREPdemo_SOURCE_DIR}/include/*.h")   
+FILE(GLOB upd_vREPdemo_HEADERS "${upd_vREPdemo_cmdline_SOURCE_DIR}/include/*.h")   
 #select all sources in the include dir
 
 
