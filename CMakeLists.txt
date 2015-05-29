@@ -22,7 +22,10 @@ if(COMMAND cmake_policy) #return true if the COMMAND cmake_policy exist - this a
 	
 	# allows automatic linking of QT - see http://www.cmake.org/cmake/help/v3.0/policy/CMP0020.html
 	cmake_policy(SET CMP0020 NEW) 
-
+	
+	#Ignore COMPILE_DEFINITIONS_<Config> properties - see http://www.cmake.org/cmake/help/v3.0/policy/CMP0043.html
+	cmake_policy(SET CMP0043 NEW) 
+	
 	# Allow using the LOCATION target property.
 	if(NOT "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 3.0)
 		cmake_policy(SET CMP0026 OLD)
