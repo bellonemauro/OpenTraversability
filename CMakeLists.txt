@@ -18,7 +18,10 @@ if(COMMAND cmake_policy) #return true if the COMMAND cmake_policy exist - this a
 	cmake_policy(SET CMP0003 NEW) # Required by CMake 2.7+
 	
 	# avoid link warnings - see http://www.cmake.org/cmake/help/v3.0/policy/CMP0015.html
-	cmake_policy(SET CMP0015 NEW) 
+	cmake_policy(SET CMP0015 NEW)
+	
+	# allows automatic linking of QT - see http://www.cmake.org/cmake/help/v3.0/policy/CMP0020.html
+	cmake_policy(SET CMP0020 NEW) 
 
 	# Allow using the LOCATION target property.
 	if(NOT "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 3.0)
