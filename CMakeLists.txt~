@@ -24,9 +24,9 @@ if(COMMAND cmake_policy) #return true if the COMMAND cmake_policy exist - this a
 	cmake_policy(SET CMP0020 NEW) 
 	
 	#Ignore COMPILE_DEFINITIONS_<Config> properties - see http://www.cmake.org/cmake/help/v3.0/policy/CMP0043.html
-	if (${CMAKE_MAJOR_VERSION}>2)	
+	if (${CMAKE_MAJOR_VERSION}=3)	
 	cmake_policy(SET CMP0043 NEW) 
-	endif (${CMAKE_MAJOR_VERSION}>2)
+	endif (${CMAKE_MAJOR_VERSION}=3)
 
 	# Allow using the LOCATION target property.
 	if(NOT "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 3.0)
