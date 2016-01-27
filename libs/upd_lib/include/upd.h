@@ -65,7 +65,14 @@ public:
      **/
     inline void setFlip (bool _flip){ m_flip_normals = _flip;}
 
-    /* Set the search radius 
+ 
+	/* Set the use of flipNormalsTowardViewPoint to avoid sign misinterpretation issues
+	*
+	**/
+	inline void setColorMapType(bool _colorMap){ m_colorMap = _colorMap; }
+	
+	
+	/* Set the search radius
 	 * /note default value is 0.5 m 
 	 * /note strongly advisable to set it according users cloud
      *
@@ -122,6 +129,7 @@ public:
 
 
 
+
 private :
 
 	void calculate_Rcloud_radius( );
@@ -132,6 +140,8 @@ private :
 
 	uint32_t GiveRainbowColor(float position); 
 
+	uint32_t GiveJetColour(double _value, double _vmin, double _vmax);
+
     //PointCloud<PointXYZRGBA>::Ptr colored_cloud (new PointCloud<PointXYZRGBA>);
 
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr input_cloud;  //--> define input cloud
@@ -141,6 +151,7 @@ private :
 	Eigen::Vector3d m_viewpoint;                          //--> viewpoint for upd calculation
 
     bool m_flip_normals;     //--> true to flip
+	bool m_colorMap;         //--> true to JET color map, false to rainbow color map
     double m_search_radius;  //--> search radius
 	int m_k_neighbors;       //--> number of neighbours
 };

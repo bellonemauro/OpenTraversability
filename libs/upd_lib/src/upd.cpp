@@ -13,6 +13,7 @@
 upd::upd() :
 	m_viewpoint(0.0, 0.0, 0.0),
 	m_flip_normals(true),
+	m_colorMap(true),
 	m_search_radius(0.5),
 	m_k_neighbors(1)
 {
@@ -255,8 +256,16 @@ void upd::getAsColorMap(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr _rgb_upd_cloud,
 		 if(UPD_cloud->points[i].radius > _traversability_index_threshold )//&& UPD_cloud->points[i].curvature<0.9999)
 		{
 			rgb_value = (UPD_cloud->points[i].radius-_traversability_index_threshold)/(1-_traversability_index_threshold);
-			_rgb_upd_cloud->points[i].rgba = GiveRainbowColor(rgb_value);
-		}
+			if (m_colorMap = true)
+			{
+				_rgb_upd_cloud->points[i].rgba = GiveJetColour(1 - rgb_value, 0.0, 1.0);
+			}
+			else
+			{
+				_rgb_upd_cloud->points[i].rgba = GiveRainbowColor(rgb_value);
+			}
+		 }
+
 		else
 		{
 			rgb_value = (UPD_cloud->points[i].radius-0.7)/0.3;
@@ -269,6 +278,60 @@ void upd::getAsColorMap(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr _rgb_upd_cloud,
 
 
 }
+
+
+/*
+Return a RGB colour value given a scalar v in the range [vmin,vmax]
+In this case each colour component ranges from 0 (no contribution) to
+1 (fully saturated), modifications for other ranges is trivial.
+The colour is clipped at the end of the scales if v is outside
+the range [vmin,vmax]
+*/
+
+
+uint32_t upd::GiveJetColour(double _value, double _vmin, double _vmax)
+{
+	//COLOUR c = { 1.0, 1.0, 1.0 }; // white
+	double R = 1.0;// byte
+	double G = 1.0;// byte
+	double B = 1.0;// byte
+	double dv;
+	//cout << "upd::GiveJetColourthe::MESSAGE:  RGB value is : " << _value << endl;
+
+	if (_value < _vmin)
+		_value = _vmin;
+	if (_value > _vmax)
+		_value = _vmax;
+	dv = _vmax - _vmin;
+
+	if (_value < (_vmin + 0.25 * dv)) {
+		R = 0;
+		G = 4 * (_value - _vmin) / dv;
+	}
+	else if (_value < (_vmin + 0.5 * dv)) {
+		R = 0;
+		B = 1 + 4 * (_vmin + 0.25 * dv - _value) / dv;
+	}
+	else if (_value < (_vmin + 0.75 * dv)) {
+		R = 4 * (_value - _vmin - 0.5 * dv) / dv;
+		B = 0;
+	}
+	else {
+		G = 1 + 4 * (_vmin + 0.75 * dv - _value) / dv;
+		B = 0;
+	}
+
+	//cout << "upd::GiveJetColourthe::MESSAGE:  RGB value is : " << R << "  " << G << "  " << B << endl;
+
+	uint8_t _R = int(ceil(255 * R));
+	uint8_t _G = int(ceil(255 * G));
+	uint8_t _B = int(ceil(255 * B));
+
+	//cout << "upd::GiveJetColourthe::MESSAGE:  RGB value is : " << _R << "  " << _G << "  " << _B << endl;
+
+	return (_R << 16) | (_G << 8) | _B;
+}
+
 
 uint32_t upd::GiveRainbowColor(float position)
 {
