@@ -256,7 +256,8 @@ void upd::getAsColorMap(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr _rgb_upd_cloud,
 		 if(UPD_cloud->points[i].radius > _traversability_index_threshold )//&& UPD_cloud->points[i].curvature<0.9999)
 		{
 			rgb_value = (UPD_cloud->points[i].radius-_traversability_index_threshold)/(1-_traversability_index_threshold);
-			if (m_colorMap = true)
+			m_colorMap = false;
+			if (m_colorMap == true)
 			{
 				_rgb_upd_cloud->points[i].rgba = GiveJetColour(1 - rgb_value, 0.0, 1.0);
 			}

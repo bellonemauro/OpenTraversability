@@ -65,6 +65,9 @@ public:
   explicit PCL_upd_DEMO (QWidget *parent = 0);
   ~PCL_upd_DEMO ();
 
+    void pp_callback_noarg ( const pcl::visualization::PointPickingEvent& event, void* );	
+    void pp_callback ( const pcl::visualization::PointPickingEvent& event, void* args);	
+
     void m_try();
 
 private slots:
@@ -251,7 +254,7 @@ private slots:
 
 protected:
   
-  void pp_callback ( pcl::visualization::PointPickingEvent& event, void* args);	
+
 	
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
   PointCloudT::Ptr m_cloud;           			//--> allocate a cloud for visualization and data processing

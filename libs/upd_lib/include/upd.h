@@ -121,6 +121,11 @@ public:
      **/
 	pcl::PointCloud<pcl::PointSurfel>::Ptr getUPD( ){ return UPD_cloud; }
 
+    /* get the result cloud normals
+     *
+     **/
+	pcl::PointCloud<pcl::Normal>::Ptr getNormals( ){ return normals; }
+
 	/* get the result as a RGB color map in traversability analysis
      *
      **/

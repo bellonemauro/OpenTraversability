@@ -128,9 +128,10 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
 
 
   m_clicked_points_3d.reset(new PointCloudT);
-  //cb_args.m_clicked_points_3d = m_clicked_points_3d;
-  //cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);//pcl::visualization::PCLVisualizer::Ptr(viewer);
-  //viewer->registerPointPickingCallback (PCL_upd_DEMO::pp_callback, (void*)&cb_args);
+  cb_args.m_clicked_points_3d = m_clicked_points_3d;
+  cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);//pcl::visualization::PCLVisualizer::Ptr(viewer);
+  //viewer->registerPointPickingCallback (&PCL_upd_DEMO::pp_callback, (void*)&cb_args);
+  viewer->registerPointPickingCallback (&PCL_upd_DEMO::pp_callback_noarg, *this);
   //std::cout << "Shift+click on three floor points, then press 'Q'..." << std::endl;
 
   pSliderValueChanged (2);
@@ -846,13 +847,40 @@ void PCL_upd_DEMO::switchVisualization()
 	}
 	else
 	{
+		m_upd->setColorMapType(false);
 		m_upd->getAsColorMap(   m_cloud_color_UPD,
 								ui->lcdNumber_unevenness->value()/ui->horizontalSlider_unevennessIndex->maximum(),
 								pcl::deg2rad(ui->lcdNumber_thresholdAngle->value()));
 		viewer->removePointCloud();
 		viewer->addPointCloud (m_cloud_color_UPD, "cloud");
         viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
+
+/* TRY for the orientation analysis of tractor and trailer
 		viewer->updatePointCloud (m_cloud_color_UPD, "cloud");
+		pcl::PointCloud<pcl::Normal>::Ptr normali_ptr (new pcl::PointCloud<pcl::Normal>);
+		normali_ptr = m_upd->getNormals();
+		if (normali_ptr->size()>1)
+		{viewer->removePointCloud("normals");
+		viewer->addPointCloudNormals<pcl::PointXYZRGBA, pcl::Normal>(m_cloud_color_UPD, normali_ptr, 25, 0.5, "normals");
+		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 0.0, 0.0, "normals");
+        viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 50, "normals");	
+
+		 
+
+		std::cout << "point index : " << (normali_ptr->width >> 1) * (normali_ptr->height + 1) << std::endl;
+		size_t normalIndex = 50;
+		std::cout << "Value x :" << normali_ptr->points [normalIndex].normal_x << " _ " <<  std::endl;
+		std::cout << "Value y :" << normali_ptr->points [normalIndex].normal_y << " _ " <<  std::endl;
+		std::cout << "Value z :" << normali_ptr->points [normalIndex].normal_z << " _ " <<  std::endl;
+
+		std::cout << "Orientation x :" << acos(normali_ptr->points [normalIndex].normal_x)*360.0/M_PI << " deg " <<  std::endl;
+		std::cout << "Orientation y :" << acos(normali_ptr->points [normalIndex].normal_y)*360.0/M_PI << " deg " <<  std::endl;
+		std::cout << "Orientation z :" << acos(normali_ptr->points [normalIndex].normal_z)*360.0/M_PI << " deg " <<  std::endl;
+
+		viewer->addCoordinateSystem(0.2, m_cloud_color_UPD->points [normalIndex].x, m_cloud_color_UPD->points [normalIndex].y, m_cloud_color_UPD->points [normalIndex].z);
+
+		}
+*/
 		ui->qvtkWidget->update ();
 	}
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
@@ -897,10 +925,15 @@ void PCL_upd_DEMO::angleSliderChange(int value)
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
   }
 
+  void PCL_upd_DEMO::pp_callback_noarg ( const pcl::visualization::PointPickingEvent& event, void* )
+  {
+  std::cout << " DO somethig cool" << std::endl;
+  
+  }
 
 
 void
-PCL_upd_DEMO::pp_callback ( pcl::visualization::PointPickingEvent& event, void* args)
+PCL_upd_DEMO::pp_callback ( const pcl::visualization::PointPickingEvent& event, void* args)
 {
   struct callback_args* data = (struct callback_args *)args;
   if (event.getPointIndex () == -1)
@@ -1076,7 +1109,7 @@ void PCL_upd_DEMO::clearLabelling()
 void PCL_upd_DEMO::about()
 {
 	 QMessageBox messageBox;
-	 messageBox.about(0,"About MB"," https://sites.google.com/site/bellonemauro ");
+	 messageBox.about(0,"About MB"," https://www.maurobellone.com ");
 	 messageBox.icon();
 	 messageBox.setFixedSize(500,700);
 }
