@@ -54,65 +54,60 @@ add_definitions (${QT_DEFINITIONS})   #required to use QT and gui
 # Add options to build specific targets
 option(build_QT5 "Build support with QT 5" "OFF")
 if(NOT build_QT5)
-find_package (Qt4 REQUIRED QtCore QtNetwork QtGui QtOpenGL QtWebkit)
+	find_package (Qt4 REQUIRED QtCore QtNetwork QtGui QtOpenGL QtWebkit)
 
-set (QT_QMAKE_EXECUTABLE )
-message (STATUS "QT_BINARY_DIR ---- ${QT_BINARY_DIR}")
+	set (QT_QMAKE_EXECUTABLE )
+	message (STATUS "QT_BINARY_DIR ---- ${QT_BINARY_DIR}")
 
 
-QT4_WRAP_CPP (PCL_upd_DEMO_HEADERS_MOC   ${PCL_upd_DEMO_HEADERS})
+	QT4_WRAP_CPP (PCL_upd_DEMO_HEADERS_MOC   ${PCL_upd_DEMO_HEADERS})
 
-QT4_WRAP_UI  (PCL_upd_DEMO_FORMS_HEADERS ${PCL_upd_DEMO_FORMS})
-include         (${QT_USE_FILE})
-add_definitions (${QT_DEFINITIONS})   #required to use QT and gui
+	QT4_WRAP_UI  (PCL_upd_DEMO_FORMS_HEADERS ${PCL_upd_DEMO_FORMS})
+	include(${VTK_USE_FILE})
+	include         (${QT_USE_FILE})
+	add_definitions (${QT_DEFINITIONS})   #required to use QT and gui
 
-add_executable (PCL_upd_DEMO  	${PCL_upd_DEMO_SOURCES} ${PCL_upd_DEMO_HEADERS}
-                                ${PCL_upd_DEMO_FORMS_HEADERS}
-                                ${PCL_upd_DEMO_HEADERS_MOC})
+	add_executable (PCL_upd_DEMO  	${PCL_upd_DEMO_SOURCES} ${PCL_upd_DEMO_HEADERS}
+		                        ${PCL_upd_DEMO_FORMS_HEADERS}
+		                        ${PCL_upd_DEMO_HEADERS_MOC})
 
-target_link_libraries ( PCL_upd_DEMO  upd_lib  
-						${Boost_LIBRARIES}
-						${PCL_LIBRARIES} )
+	target_link_libraries ( PCL_upd_DEMO  upd_lib  Qt4::QtGui QVTK
+							${Boost_LIBRARIES}
+							${PCL_LIBRARIES} )
 
-# allows folders for MSVC
-if (MSVC AND ENABLE_SOLUTION_FOLDERS) 
-	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Apps")
-endif (MSVC AND ENABLE_SOLUTION_FOLDERS)
 
 elseif(  build_QT5)
 
-#set(CMAKE_PREFIX_PATH "C:/Qt/5.4/msvc2013_64_opengl/")
+	#set(CMAKE_PREFIX_PATH "C:/Qt/5.4/msvc2013_64_opengl/")
 
-# Find the QtWidgets library
-find_package(Qt5Widgets REQUIRED)
+	# Find the QtWidgets library
+	find_package(Qt5Widgets REQUIRED)
 
-# Instruct CMake to run moc automatically when needed.
-set(CMAKE_AUTOMOC ON)
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+	# Instruct CMake to run moc automatically when needed.
+	set(CMAKE_AUTOMOC ON)
+	# Find includes in corresponding build directories
+	set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
- 
-QT5_WRAP_UI(PCL_upd_DEMO_FORMS_HEADERS ${PCL_upd_DEMO_FORMS})
+	 
+	QT5_WRAP_UI(PCL_upd_DEMO_FORMS_HEADERS ${PCL_upd_DEMO_FORMS})
 
-message (STATUS "PCL_upd_DEMO_FORMS_HEADERS  :: ${PCL_upd_DEMO_FORMS_HEADERS} ")
+	message (STATUS "PCL_upd_DEMO_FORMS_HEADERS  :: ${PCL_upd_DEMO_FORMS_HEADERS} ")
 
-add_executable (PCL_upd_DEMO  	${PCL_upd_DEMO_SOURCES} ${PCL_upd_DEMO_HEADERS}
-                                ${PCL_upd_DEMO_FORMS_HEADERS})
-                                #${PCL_upd_DEMO_HEADERS_MOC})#${PCL_upd_DEMO_FORMS} )
-qt5_use_modules(PCL_upd_DEMO Widgets)
+	add_executable (PCL_upd_DEMO  	${PCL_upd_DEMO_SOURCES} ${PCL_upd_DEMO_HEADERS}
+		                        ${PCL_upd_DEMO_FORMS_HEADERS})
+		                        #${PCL_upd_DEMO_HEADERS_MOC})#${PCL_upd_DEMO_FORMS} )
+	qt5_use_modules(PCL_upd_DEMO Widgets)
 
-target_link_libraries ( PCL_upd_DEMO  upd_lib  
-						${Boost_LIBRARIES}
-						${PCL_LIBRARIES} )
+	target_link_libraries ( PCL_upd_DEMO  upd_lib  
+							${Boost_LIBRARIES}
+							${PCL_LIBRARIES} )
 			
+
+endif()
 
 # allows folders for MSVC
 if (MSVC AND ENABLE_SOLUTION_FOLDERS) 
 	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Apps")
 endif (MSVC AND ENABLE_SOLUTION_FOLDERS)
-
-endif()
-
-
 
 
