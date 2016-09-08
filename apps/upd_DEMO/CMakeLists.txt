@@ -71,10 +71,18 @@ if(NOT build_QT5)
 		                        ${PCL_upd_DEMO_FORMS_HEADERS}
 		                        ${PCL_upd_DEMO_HEADERS_MOC})
 
-	target_link_libraries ( PCL_upd_DEMO  upd_lib  Qt4::QtGui QVTK
+if (NOT UNIX)
+	message (STATUS "PCL_UPD_DEMO ---- WIN found")
+	target_link_libraries ( PCL_upd_DEMO  upd_lib  #Qt4::QtGui QVTK   # windows does not need to link this 
 							${Boost_LIBRARIES}
 							${PCL_LIBRARIES} )
 
+elseif ()
+	message (STATUS "PCL_UPD_DEMO ---- UNIX found")
+	target_link_libraries ( PCL_upd_DEMO  upd_lib  Qt4::QtGui QVTK
+							${Boost_LIBRARIES}
+							${PCL_LIBRARIES} )
+endif ()
 
 elseif(  build_QT5)
 

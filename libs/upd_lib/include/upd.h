@@ -27,6 +27,8 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/ml/svm.h>
+#include <pcl/ml/svm_wrapper.h>
 
 // boost libraries 
 #include <boost/thread/thread.hpp>
@@ -91,10 +93,10 @@ public:
      **/
     inline void setViewPoint (Eigen::Vector3d _m_viewpoint){ m_viewpoint = _m_viewpoint;}
 
-	/* Set viewpoint  -- TODO --- doesn't properly work yet
+	/* Set viewpoint  overload function
      *
      **/
-	//inline void setViewPoint (float _x, float _y, float _z){ m_viewpoint = Eigen::Vector3f(_x, _y, _z);}
+	inline void setViewPoint (float _x, float _y, float _z){ setViewPoint( Eigen::Vector3d(_x, _y, _z) );}
 
     /* Run UPD with radius method
      *
