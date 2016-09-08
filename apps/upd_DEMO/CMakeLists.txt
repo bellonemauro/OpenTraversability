@@ -77,7 +77,7 @@ if (NOT UNIX)
 							${Boost_LIBRARIES}
 							${PCL_LIBRARIES} )
 
-elseif ()
+elseif (UNIX)
 	message (STATUS "PCL_UPD_DEMO ---- UNIX found")
 	target_link_libraries ( PCL_upd_DEMO  upd_lib  Qt4::QtGui QVTK
 							${Boost_LIBRARIES}

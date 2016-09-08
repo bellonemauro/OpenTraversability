@@ -264,7 +264,7 @@ protected:
   PointCloudT::Ptr m_clicked_points_3d;         //--> single point to detect a click in the visualizer
   PointCloudT::Ptr m_labeled_point;             //--> single point to show a point that can be labels - see function for more details
 
-
+  pcl::visualization::PointCloudColorHandlerRGBField<PointT> m_rgb_color;
 
 
   upd *m_upd;

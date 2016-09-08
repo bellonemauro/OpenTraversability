@@ -122,11 +122,11 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
    ui->treeWidget_classification->resizeColumnToContents(1);
 
   viewer->addCoordinateSystem (1.0);
-  viewer->addPointCloud (m_cloud, "cloud");
+  m_rgb_color.setInputCloud(m_cloud );
+  viewer->addPointCloud (m_cloud, m_rgb_color, "cloud");
+  //viewer->addPointCloud (m_cloud, "cloud");
 
-  // Add point picking callback to viewer:
-
-
+  // Add point picking callback to viewer: //TODO NOT WORKING YET
   m_clicked_points_3d.reset(new PointCloudT);
   cb_args.m_clicked_points_3d = m_clicked_points_3d;
   cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);//pcl::visualization::PCLVisualizer::Ptr(viewer);
@@ -228,7 +228,7 @@ PCL_upd_DEMO::enablePCDview()
             //cout << "Loaded " << cloud->size () << " data points from " << m_file_pcd_list.at(0) << endl;
 
 	viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");
-	viewer->updatePointCloud (cloud, "cloud");
+    viewer->updatePointCloud (cloud, m_rgb_color, "cloud");
 	ui->qvtkWidget->update ();
 */
 	QMessageBox::information(this, " Message ", "TODO MB: play with pcds ",
@@ -320,7 +320,7 @@ void PCL_upd_DEMO::updateImagesView()
 //TODO - the status bar doesn't properly work
     pcl::transformPointCloud(*m_cloud, *m_cloud, m_transformation);
     ui->label_fileStatus_cloud->setText(m_file_pcd_list.at(image_index));  // set the status bar to the current pcd
-    if(!viewer->updatePointCloud (m_cloud, "cloud"))QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
+    if(!viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud"))QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
 	//else QMessageBox::warning(this, "Warning !", " Viewer updated!");
 		}
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
@@ -341,7 +341,7 @@ void PCL_upd_DEMO::openFile()
 
    ui->label_fileStatus_cloud->setText(QString::fromStdString(cloud_path.toUtf8().constData()));  // set the status bar to the current pcd
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");
-   viewer->updatePointCloud (m_cloud, "cloud");
+   viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
 		ui->qvtkWidget->update ();
 }
 
@@ -404,7 +404,7 @@ void PCL_upd_DEMO::updatePCDview()
 //TODO - the status bar doesn't properly work
     pcl::transformPointCloud(*m_cloud, *m_cloud, m_transformation);
     ui->label_fileStatus_cloud->setText(m_file_pcd_list.at(pcd_index));  // set the status bar to the current pcd
-    if(!viewer->updatePointCloud (m_cloud, "cloud"))QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
+    if(!viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud"))QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
 	//else QMessageBox::warning(this, "Warning !", " Viewer updated!");
 
 
@@ -425,7 +425,7 @@ void PCL_upd_DEMO::updatePCDview()
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-   viewer->updatePointCloud (m_cloud, "cloud");
+   viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
    ui->qvtkWidget->update ();
     pcl::copyPointCloud(*m_cloud, *m_cloud_filtered);   // copy the cloud into the filtered cloud to avoid filtering mistakes
 }
@@ -507,7 +507,8 @@ void PCL_upd_DEMO::applyPassthrogh()
 //    QMessageBox::warning(this, "Warning !", "Only " + QString::number(m_cloud_filtered->size()) + " points remained ");
 
     viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-    viewer->updatePointCloud (m_cloud_filtered, "cloud");
+    pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb_color(m_cloud_filtered);
+    viewer->updatePointCloud (m_cloud_filtered, rgb_color, "cloud");
     ui->qvtkWidget->update ();
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 }
@@ -547,7 +548,8 @@ void PCL_upd_DEMO::applyVoxelization()
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-    viewer->updatePointCloud (m_cloud_filtered, "cloud");
+   pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb_color(m_cloud_filtered);
+   viewer->updatePointCloud (m_cloud_filtered, rgb_color, "cloud");
     ui->qvtkWidget->update ();
 
 }
@@ -586,7 +588,8 @@ void PCL_upd_DEMO::applySOR()
     QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-    viewer->updatePointCloud (m_cloud_filtered, "cloud");
+   pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb_color(m_cloud_filtered);
+   viewer->updatePointCloud (m_cloud_filtered, rgb_color, "cloud");
     ui->qvtkWidget->update ();
 }
 
@@ -594,7 +597,7 @@ void PCL_upd_DEMO::removeFilters()
 {
     pcl::copyPointCloud(*m_cloud, *m_cloud_filtered);
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-    viewer->updatePointCloud (m_cloud, "cloud");
+    viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
     ui->qvtkWidget->update ();
 
 }
@@ -668,7 +671,7 @@ else
 
    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-viewer->updatePointCloud (m_cloud, "cloud");
+viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
 ui->qvtkWidget->update ();
 }
 
@@ -754,7 +757,7 @@ for (float y=-0.5f; y<=0.5f; y+=0.05f)
 	QMessageBox::warning(this, "Warning !", "Surface created");
 	pcl::copyPointCloud(*surface,*m_cloud);
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-	viewer->updatePointCloud (m_cloud, "cloud");
+    viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
 	ui->qvtkWidget->update ();
 }
 
@@ -842,7 +845,8 @@ void PCL_upd_DEMO::switchVisualization()
 	
 	if(!ui->checkBox_visTraversability->isChecked()) 
 	{    
-		viewer->updatePointCloud (m_cloud, "cloud");
+
+        viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
 		ui->qvtkWidget->update ();
 	}
 	else
@@ -852,11 +856,12 @@ void PCL_upd_DEMO::switchVisualization()
 								ui->lcdNumber_unevenness->value()/ui->horizontalSlider_unevennessIndex->maximum(),
 								pcl::deg2rad(ui->lcdNumber_thresholdAngle->value()));
 		viewer->removePointCloud();
-		viewer->addPointCloud (m_cloud_color_UPD, "cloud");
+        pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb_color(m_cloud_color_UPD);
+        viewer->addPointCloud (m_cloud_color_UPD, rgb_color, "cloud");
         viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
 
 /* TRY for the orientation analysis of tractor and trailer
-		viewer->updatePointCloud (m_cloud_color_UPD, "cloud");
+        viewer->updatePointCloud (m_cloud_color_UPD, m_rgb_color, "cloud");
 		pcl::PointCloud<pcl::Normal>::Ptr normali_ptr (new pcl::PointCloud<pcl::Normal>);
 		normali_ptr = m_upd->getNormals();
 		if (normali_ptr->size()>1)
@@ -976,8 +981,10 @@ void PCL_upd_DEMO::startStopLabelling()
 		m_labeled_point->clear();
 		m_labeled_point->push_back( m_cloud->at(_label_counter));
 		m_labeled_point->at(0).rgba = 0x00FF00FF;
+        pcl::visualization::PointCloudColorHandlerCustom<PointT> rgb_color(m_labeled_point, 255, 0, 255);
+        viewer->updatePointCloud (m_labeled_point, rgb_color, "label_point");
 
-		viewer->addPointCloud(m_labeled_point, "label_point",0);
+        viewer->addPointCloud(m_labeled_point, rgb_color, "label_point",0);
 		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 7, "label_point");   //5 is for bigger size - in this way the point is enphasized
 		_label_counter++;
 		return;
@@ -991,8 +998,9 @@ void PCL_upd_DEMO::startStopLabelling()
 		m_labeled_point->at(0).rgba = 0x00FF00FF;
 
 		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 7, "label_point");   //5 is for bigger size - in this way the point is enphasized
-		viewer->updatePointCloud (m_labeled_point, "label_point");
-		viewer->updatePointCloud (m_cloud, "cloud");
+        pcl::visualization::PointCloudColorHandlerCustom<PointT> rgb_color(m_labeled_point, 255, 0, 255);
+        viewer->updatePointCloud (m_labeled_point, rgb_color, "label_point");
+        viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
 		ui->qvtkWidget->update ();
 		_label_counter++;
 		return;
@@ -1078,7 +1086,7 @@ void PCL_upd_DEMO::selectPointLabel()
 
 	viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 7, "label_point");   //5 is for bigger size - in this way the point is enphasized
 	viewer->updatePointCloud (m_labeled_point, "label_point");
-	viewer->updatePointCloud (m_cloud, "cloud");
+    viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
 	ui->qvtkWidget->update ();
 
 

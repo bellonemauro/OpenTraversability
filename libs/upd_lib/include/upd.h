@@ -27,8 +27,8 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/ml/svm.h>
-#include <pcl/ml/svm_wrapper.h>
+//#include <pcl/ml/svm.h>
+//#include <pcl/ml/svm_wrapper.h>
 
 // boost libraries 
 #include <boost/thread/thread.hpp>
