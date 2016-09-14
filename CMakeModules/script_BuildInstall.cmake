@@ -40,7 +40,11 @@ FILE(GLOB REL_DLLS "${VTK_DIR}/bin/Release/*.dll")
 		
 		
 # TODO: remember to check if dir exist !!
+if (Boost_LIBRARY_DIR_RELEASE )
+EXTRACT_DEB_REL_DLLS (${Boost_LIBRARY_DIR_RELEASE}   d )# --> OUR custom macro for searching dlls -- d is not the postfix for boost so it will take everything
+elseif (Boost_LIBRARY_DIR)
 EXTRACT_DEB_REL_DLLS (${Boost_LIBRARY_DIR}   d )# --> OUR custom macro for searching dlls -- d is not the postfix for boost so it will take everything
+endif ()
 if (ENABLE_VERBOSE)
 message (STATUS "\n\n REL DLLS are : ${REL_DLLS}")
 message (STATUS "\n\n DEB DLLS are : ${DEB_DLLS}")
@@ -48,10 +52,10 @@ endif (ENABLE_VERBOSE)
 FOREACH(F ${REL_DLLS})
 	 INSTALL(FILES "${F}" DESTINATION bin)   # install all release dll
 ENDFOREACH(F)
-
-FOREACH(F ${DEB_DLLS})
+#EXTRACT_DEB_REL_DLLS (${Boost_LIBRARY_DIR_DEBUG}   d )# --> OUR custom macro for searching dlls -- d is not the postfix for boost so it will take everything
+#FOREACH(F ${DEB_DLLS})
 	 #INSTALL(FILES "${F}" DESTINATION bin)   # no install debug for now
-ENDFOREACH(F)
+#ENDFOREACH(F)
 
 # TODO: remember to check if dir exist !!
 EXTRACT_DEB_REL_DLLS (${PCL_DIR}/bin/ _debug )# --> OUR custom macro for searching dlls -- 
