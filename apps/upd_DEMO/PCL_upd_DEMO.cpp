@@ -9,6 +9,8 @@
 
 #include "PCL_upd_DEMO.h"
 
+
+
 PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   QMainWindow (parent),
   ui (new Ui::PCL_upd_DEMO)
@@ -130,8 +132,9 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   m_clicked_points_3d.reset(new PointCloudT);
   cb_args.m_clicked_points_3d = m_clicked_points_3d;
   cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);//pcl::visualization::PCLVisualizer::Ptr(viewer);
-  //viewer->registerPointPickingCallback (&PCL_upd_DEMO::pp_callback, (void*)&cb_args);
-  viewer->registerPointPickingCallback (&PCL_upd_DEMO::pp_callback_noarg, *this);
+  viewer->registerPointPickingCallback (&PCL_upd_DEMO::pp_callback, *this, (void*)&cb_args);
+  //viewer->registerMouseCallback(&PCL_upd_DEMO::mouseEventOccurred, *this, (void*)&viewer);
+
   //std::cout << "Shift+click on three floor points, then press 'Q'..." << std::endl;
 
   pSliderValueChanged (2);
@@ -930,21 +933,31 @@ void PCL_upd_DEMO::angleSliderChange(int value)
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
   }
 
-  void PCL_upd_DEMO::pp_callback_noarg ( const pcl::visualization::PointPickingEvent& event, void* )
-  {
-  std::cout << " DO somethig cool" << std::endl;
-  
-  }
+void PCL_upd_DEMO::mouseEventOccurred (const pcl::visualization::MouseEvent &event, void* _viewer)
+{
+    pcl::visualization::PCLVisualizer *viewer = static_cast<pcl::visualization::PCLVisualizer *> (_viewer);
+    if (event.getButton () == pcl::visualization::MouseEvent::LeftButton &&
+        event.getType () == pcl::visualization::MouseEvent::MouseButtonRelease)
+    {
+      std::cout << "Left mouse button released at position (" << event.getX () << ", " << event.getY () << ")" << std::endl;
 
+      char str[512];
+      sprintf (str, "text");//(str, "text#%03d", text_id ++);
+      std::cout << "mouseEventOccurred DO somethig cool" << std::endl;
+      //viewer->addText ("clicked here", event.getX (), event.getY (), str);
+    }
+//  std::cout << " DO somethig cool, you gave me the value "<< std::endl;
+}
 
 void
 PCL_upd_DEMO::pp_callback ( const pcl::visualization::PointPickingEvent& event, void* args)
 {
   struct callback_args* data = (struct callback_args *)args;
-  if (event.getPointIndex () == -1)
-    return;
+  if (event.getPointIndex () == -1){
+      return;}
   PointT current_point;
   event.getPoint(current_point.x, current_point.y, current_point.z);
+  data->m_clicked_points_3d->clear();
   data->m_clicked_points_3d->points.push_back(current_point);
   // Draw clicked points in red:
   pcl::visualization::PointCloudColorHandlerCustom<PointT> red (data->m_clicked_points_3d, 255, 0, 0);

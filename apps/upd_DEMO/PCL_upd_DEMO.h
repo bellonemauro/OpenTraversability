@@ -65,9 +65,13 @@ public:
   explicit PCL_upd_DEMO (QWidget *parent = 0);
   ~PCL_upd_DEMO ();
 
-    void pp_callback_noarg ( const pcl::visualization::PointPickingEvent& event, void* );	
-    void pp_callback ( const pcl::visualization::PointPickingEvent& event, void* args);	
+   /**  Point picking callback,
+     *   press shift + click to activate
+     *
+     */
+    void pp_callback ( const pcl::visualization::PointPickingEvent& event, void* args);
 
+    void mouseEventOccurred (const pcl::visualization::MouseEvent &event, void* _viewer);
     void m_try();
 
 private slots:
