@@ -40,8 +40,6 @@
 // Boost
 #include <boost/filesystem.hpp>
 
-
-
 // UPD
 #include <upd.h>
 
@@ -53,7 +51,6 @@ using namespace std;
 namespace Ui
 {
   class PCL_upd_DEMO;
-  class Kinect2Framework;
 }
 
 
@@ -71,15 +68,25 @@ public:
      */
     void pp_callback ( const pcl::visualization::PointPickingEvent& event, void* args);
 
+
+    /**  All the mouse event can be passed from the visualizer,
+      *
+      */
     void mouseEventOccurred (const pcl::visualization::MouseEvent &event, void* _viewer);
-    void m_try();
+
+
+    /**  Extract a patch in a specific point from the point cloud to be labelled,
+      *
+      */
+    void extractPatch(double _size, float _x, float _y, float _z);
+
 
 private slots:
  /** change the point size dimension for the visualization
    * \note 
    */
   void
-  pSliderValueChanged (int value);
+  pointSizeSliderValueChanged (int value);
 
   /** open the file list
    * \note 
@@ -267,6 +274,7 @@ protected:
   PointCloudT::Ptr m_labeled_cloud;				//--> labeled cloud - a colored cloud is used to label ground and not ground - green = ground --- red = NOT ground 
   PointCloudT::Ptr m_clicked_points_3d;         //--> single point to detect a click in the visualizer
   PointCloudT::Ptr m_labeled_point;             //--> single point to show a point that can be labels - see function for more details
+  PointCloudT::Ptr m_cloud_patch;               //--> extracted patch from a point cloud
 
   pcl::visualization::PointCloudColorHandlerRGBField<PointT> m_rgb_color;
 
@@ -286,7 +294,8 @@ protected:
   unsigned int green;
   unsigned int blue;
   unsigned int _label_counter;
-  bool _labelled_paused;
+  bool m_labelling_active;
+  bool m_labelled_paused;
 
   struct callback_args{
   // structure used to pass arguments to the callback function

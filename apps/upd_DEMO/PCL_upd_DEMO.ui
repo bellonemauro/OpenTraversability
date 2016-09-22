@@ -56,7 +56,7 @@
            <x>0</x>
            <y>0</y>
            <width>1288</width>
-           <height>825</height>
+           <height>819</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
@@ -104,7 +104,7 @@
                <x>0</x>
                <y>0</y>
                <width>630</width>
-               <height>530</height>
+               <height>524</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -145,7 +145,7 @@
                <x>0</x>
                <y>0</y>
                <width>630</width>
-               <height>530</height>
+               <height>524</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -1144,7 +1144,7 @@
      <x>0</x>
      <y>0</y>
      <width>1310</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1193,6 +1193,7 @@
     </property>
     <addaction name="actionTryOption"/>
     <addaction name="actionApply_Transformation"/>
+    <addaction name="actionRegister_visualizer_to_mouse_events"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1295,6 +1296,14 @@
   <action name="actionLabelled_Cloud">
    <property name="text">
     <string>Labelled Cloud</string>
+   </property>
+  </action>
+  <action name="actionRegister_visualizer_to_mouse_events">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Register visualizer to mouse events</string>
    </property>
   </action>
  </widget>
