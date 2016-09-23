@@ -25,7 +25,9 @@
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
 #include <pcl/common/angles.h>
+#include <pcl/common/common_headers.h>
 #include <pcl/visualization/pcl_visualizer.h>
 // for filtering
 #include <pcl/filters/passthrough.h>
@@ -45,6 +47,29 @@
 
 typedef pcl::PointXYZRGBA PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
+
+// --------------------------------------------------------------------
+// -----Create our own point type with feature and classification -----
+// --------------------------------------------------------------------
+
+struct PointClassifiable
+{
+  PCL_ADD_POINT4D;                  // preferred way of adding a XYZ+padding
+  int idx;        // It's the feature index. It has to be an integer number greater or equal to zero.
+  float feature;  // The value assigned to the correspondent feature.
+  float label;    // The label value. It is a mandatory to train the classifier.
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW   // make sure our new allocators are aligned
+} EIGEN_ALIGN16;                    // enforce SSE padding for correct memory alignment
+
+// here we assume a XYZ + "idx" + "feature"
+POINT_CLOUD_REGISTER_POINT_STRUCT (PointClassifiable,
+                                  (float, x, x)
+                                  (float, y, y)
+                                  (float, z, z)
+                                  (int, idx, idx)
+                                  (float, feature, feature)
+                                  (float, label, label)
+)
 
 using namespace std;
 
@@ -79,6 +104,7 @@ public:
       *
       */
     void extractPatch(double _size, float _x, float _y, float _z);
+
 
 
 private slots:
@@ -274,7 +300,8 @@ protected:
   PointCloudT::Ptr m_labeled_cloud;				//--> labeled cloud - a colored cloud is used to label ground and not ground - green = ground --- red = NOT ground 
   PointCloudT::Ptr m_clicked_points_3d;         //--> single point to detect a click in the visualizer
   PointCloudT::Ptr m_labeled_point;             //--> single point to show a point that can be labels - see function for more details
-  PointCloudT::Ptr m_cloud_patch;               //--> extracted patch from a point cloud
+  pcl::PointCloud<pcl::PointSurfel>::Ptr m_cloud_patch;               //--> extracted patch from a point cloud
+  pcl::PointCloud<PointClassifiable>::Ptr m_classifiable_cloud;  //--> define a classifiable point cloud to be used for SVM
 
   pcl::visualization::PointCloudColorHandlerRGBField<PointT> m_rgb_color;
 
@@ -307,9 +334,20 @@ protected:
 
   struct callback_args cb_args;
 
+
+
+
+  /**  Copy the specific patch to a classifiable point cloud with assigned label and feature
+    *
+    */
+  void copyPatchToClassifiable(const pcl::PointCloud<pcl::PointSurfel> &_cloud_in,
+                               pcl::PointCloud<PointClassifiable> &_cloud_out,
+                               float _label);
+
 private:
 
   Ui::PCL_upd_DEMO *ui;    //--> the user interface
+
 
 };
 

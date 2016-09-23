@@ -130,8 +130,22 @@ void PCL_upd_DEMO::openPCDFolder ()
         QDir m_dir = QFileDialog::getExistingDirectory(this, tr("Open folder"), QDir::currentPath(), 0);
         QStringList nameFilter;
         nameFilter << "*.pcd" << "*.bin";
-        m_file_pcd_list = m_dir.entryList( nameFilter, QDir::Files | QDir::NoDotAndDotDot );
-        ui->listWidget_pcdNames->clear();
+        QStringList file_pcd_list;
+        file_pcd_list = m_dir.entryList( nameFilter, QDir::Files | QDir::NoDotAndDotDot );
+
+        m_file_pcd_list.clear();
+        for (size_t i=0; i < file_pcd_list.size(); i++)
+        {
+            QString file_with_absolute_path = m_dir.path();
+            std::cout << file_pcd_list.at(i).toStdString() << std::endl;
+
+            file_with_absolute_path.append("/");
+            file_with_absolute_path.append(file_pcd_list.at(i));
+
+            std::cout << file_with_absolute_path.toStdString() << std::endl;
+            m_file_pcd_list.push_back(file_with_absolute_path);
+
+        }
         ui->listWidget_pcdNames->addItems(m_file_pcd_list);
 }
 
