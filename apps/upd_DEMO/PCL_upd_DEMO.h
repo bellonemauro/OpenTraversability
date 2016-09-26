@@ -268,6 +268,8 @@ private slots:
   void 
   switchVisualization();
 
+  void 
+  addRemoveCoordinateSystem();
 
   /** run UPD
  * \note
@@ -281,8 +283,6 @@ private slots:
   void 
   about();
 
-  void 
-  enablePCDview();
   
   void
   updateImagesView();

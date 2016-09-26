@@ -9,7 +9,6 @@
 
 #include "PCL_upd_DEMO.h"
 
-#include <pcl/visualization/common/actor_map.h>
 
 PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   QMainWindow (parent),
@@ -34,9 +33,6 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   _label_counter = 0;
   m_labelling_active = false;
   m_labelled_paused = false;
-
-  //pcl::PCDReader reader;
-  //reader.read("./logo.pcd", *cloud);
 
   if (pcl::io::loadPCDFile ("./logo.pcd", *m_cloud) == -1) //* load the file
   {
@@ -92,7 +88,6 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
 
 
   //buttons
-  connect (ui->pushButton_PCDView, SIGNAL(clicked()), this, SLOT (enablePCDview()));
   connect (ui->pushButton_applyPfilter, SIGNAL(clicked()), this, SLOT (applyPassthrogh()));
   connect (ui->pushButton_applyVoxel, SIGNAL(clicked()), this, SLOT (applyVoxelization()));
   connect (ui->pushButton_applySOR, SIGNAL(clicked()), this, SLOT (applySOR()));
@@ -116,27 +111,26 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->listWidget_pcdNames, SIGNAL(itemDoubleClicked (QListWidgetItem*)), this, SLOT(updatePCDview()));
   connect (ui->listWidget_imageNames, SIGNAL(itemDoubleClicked (QListWidgetItem*)), this, SLOT(updateImagesView()));
   connect (ui->treeWidget_classification, SIGNAL(itemDoubleClicked (QTreeWidgetItem *,int)), this, SLOT(selectPointLabel())); 
-  //connect (ui->checkBox_filpNormals, SIGNAL(clicked()), this, SLOT(setFlip()));
   connect (ui->radioButton_radius, SIGNAL(clicked()), this, SLOT(setRadiusOrKNeighborsMethod()));
   connect (ui->radioButton_kNeighbors, SIGNAL(clicked()), this, SLOT(setRadiusOrKNeighborsMethod()));
 
   connect (ui->checkBox_visTraversability, SIGNAL (clicked()), this, SLOT(switchVisualization()));
+  connect (ui->checkBox_coordinateSystem, SIGNAL (clicked()), this, SLOT(addRemoveCoordinateSystem()));
 
    ui->treeWidget_classification->resizeColumnToContents(0);
    ui->treeWidget_classification->resizeColumnToContents(1);
 
-  viewer->addCoordinateSystem (1.0);
+  if (ui->checkBox_coordinateSystem->isChecked()) viewer->addCoordinateSystem ( );
+  //viewer->addPointCloud (m_cloud, "cloud");   // new 1.8 requrire the color attributes to be explicit ???
   m_rgb_color.setInputCloud(m_cloud );
   viewer->addPointCloud (m_cloud, m_rgb_color, "cloud");
-  //viewer->addPointCloud (m_cloud, "cloud");
-
+ 
   // Add point picking callback to viewer
   m_clicked_points_3d.reset(new PointCloudT);
   cb_args.m_clicked_points_3d = m_clicked_points_3d;
-  cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);//pcl::visualization::PCLVisualizer::Ptr(viewer);
+  cb_args.viewerPtr =  boost::shared_ptr<pcl::visualization::PCLVisualizer> (viewer);
   viewer->registerPointPickingCallback (&PCL_upd_DEMO::pp_callback, *this, (void*)&cb_args);
   viewer->registerMouseCallback(&PCL_upd_DEMO::mouseEventOccurred, *this, (void*)&viewer);
-
   //std::cout << "Shift+click on three floor points, then press 'Q'..." << std::endl;
 
   pointSizeSliderValueChanged (2);
@@ -146,43 +140,12 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
 }
 
 
-
-
-
 void PCL_upd_DEMO::pointSizeSliderValueChanged (int value)
 {
   viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, value, "cloud");
   ui->lcdNumber_p->display(value);
   ui->qvtkWidget->update ();
 }
-
-void PCL_upd_DEMO::enablePCDview()
-{
-	// first check if the file is empty to prevent user mistake
-	if (m_file_pcd_list.empty())
-	{
-		QMessageBox::warning(this, "Warning !", "File list not loaded");
- 		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
-		return;
-	}
-	else
-	{
-	// then extract the file list
-
-/*    if (pcl::io::loadPCDFile (m_file_pdc_list.at(0), *cloud) == -1) QMessageBox::warning(this, "Warning !", "File not found !");
-            //cout << "Loaded " << cloud->size () << " data points from " << m_file_pcd_list.at(0) << endl;
-
-	viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");
-    viewer->updatePointCloud (cloud, m_rgb_color, "cloud");
-	ui->qvtkWidget->update ();
-*/
-	QMessageBox::information(this, " Message ", "TODO MB: play with pcds ",
-		" OK ", m_file_pcd_list.at(0));
-	}
-
-
-}
-
 
 
 
@@ -201,18 +164,24 @@ void PCL_upd_DEMO::updateImagesView()
          }
 	ui->label_image->setPixmap(QPixmap::fromImage(image));
     ui->label_fileStatus_image->setText(m_file_image_list.at(image_index));  // set the status bar to the current pcd
-
 	}
 
 	if (m_file_pcd_list.size () > image_index)
 	{
-		if (pcl::io::loadPCDFile (m_file_pcd_list.at(image_index).toStdString(), *m_cloud)) QMessageBox::warning(this, "Warning !", "File not found !");
-//TODO - the status bar doesn't properly work
+		if (pcl::io::loadPCDFile (m_file_pcd_list.at(image_index).toStdString(), *m_cloud)) 
+			QMessageBox::warning(this, "Warning !", "File not found !");
+
     pcl::transformPointCloud(*m_cloud, *m_cloud, m_transformation);
     ui->label_fileStatus_cloud->setText(m_file_pcd_list.at(image_index));  // set the status bar to the current pcd
-    if(!viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud"))QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
-	//else QMessageBox::warning(this, "Warning !", " Viewer updated!");
-		}
+   viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
+   if(!viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud")) {
+		QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
+		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+		return; 
+       }	
+	}   //else QMessageBox::warning(this, "Warning !", " Viewer updated!");
+	ui->qvtkWidget->update ();
+    pcl::copyPointCloud(*m_cloud, *m_cloud_filtered);   // copy the cloud into the filtered cloud to avoid filtering mistakes
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
 }
@@ -224,11 +193,17 @@ void PCL_upd_DEMO::updatePCDview()
    QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
    int pcd_index = ui->listWidget_pcdNames->currentRow();      // take the pcd address from the listWidget selected row and read the cloud
   
-   if (pcl::io::loadPCDFile (m_file_pcd_list.at(pcd_index).toStdString(), *m_cloud)) QMessageBox::warning(this, "Warning !", "File not found !");
-//TODO - the status bar doesn't properly work
+   if (pcl::io::loadPCDFile (m_file_pcd_list.at(pcd_index).toStdString(), *m_cloud)) 
+	   QMessageBox::warning(this, "Warning !", "File not found !");
+
     pcl::transformPointCloud(*m_cloud, *m_cloud, m_transformation);
     ui->label_fileStatus_cloud->setText(m_file_pcd_list.at(pcd_index));  // set the status bar to the current pcd
-    if(!viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud"))QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
+   viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
+   if(!viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud")){
+	   QMessageBox::warning(this, "Warning !", " Viewer NOT updated! What's up?");
+		QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+		return;
+   }
 	//else QMessageBox::warning(this, "Warning !", " Viewer updated!");
 
 
@@ -245,11 +220,11 @@ void PCL_upd_DEMO::updatePCDview()
     ui->label_fileStatus_image->setText(m_file_image_list.at(pcd_index));  // set the status bar to the current pcd
 
 	}
-
+   ui->qvtkWidget->update ();
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
-   viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
-   viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
+//   viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
+//   viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
    ui->qvtkWidget->update ();
     pcl::copyPointCloud(*m_cloud, *m_cloud_filtered);   // copy the cloud into the filtered cloud to avoid filtering mistakes
 }
@@ -344,6 +319,11 @@ void PCL_upd_DEMO::pp_callback ( const pcl::visualization::PointPickingEvent& ev
   extractPatch(patch_size, current_point.x, current_point.y, current_point.z);
 }
 
+void PCL_upd_DEMO::addRemoveCoordinateSystem()
+{
+  if (ui->checkBox_coordinateSystem->isChecked()) viewer->addCoordinateSystem ( );
+  else viewer->removeCoordinateSystem ( );
+}
 
 
 

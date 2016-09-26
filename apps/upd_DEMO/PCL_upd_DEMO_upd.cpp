@@ -96,32 +96,6 @@ void PCL_upd_DEMO::switchVisualization()
         viewer->addPointCloud (m_cloud_color_UPD, rgb_color, "cloud");
         viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");	
 
-/* TRY for the orientation analysis of tractor and trailer
-        viewer->updatePointCloud (m_cloud_color_UPD, m_rgb_color, "cloud");
-		pcl::PointCloud<pcl::Normal>::Ptr normali_ptr (new pcl::PointCloud<pcl::Normal>);
-		normali_ptr = m_upd->getNormals();
-		if (normali_ptr->size()>1)
-		{viewer->removePointCloud("normals");
-		viewer->addPointCloudNormals<pcl::PointXYZRGBA, pcl::Normal>(m_cloud_color_UPD, normali_ptr, 25, 0.5, "normals");
-		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 0.0, 0.0, "normals");
-        viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 50, "normals");	
-
-		 
-
-		std::cout << "point index : " << (normali_ptr->width >> 1) * (normali_ptr->height + 1) << std::endl;
-		size_t normalIndex = 50;
-		std::cout << "Value x :" << normali_ptr->points [normalIndex].normal_x << " _ " <<  std::endl;
-		std::cout << "Value y :" << normali_ptr->points [normalIndex].normal_y << " _ " <<  std::endl;
-		std::cout << "Value z :" << normali_ptr->points [normalIndex].normal_z << " _ " <<  std::endl;
-
-		std::cout << "Orientation x :" << acos(normali_ptr->points [normalIndex].normal_x)*360.0/M_PI << " deg " <<  std::endl;
-		std::cout << "Orientation y :" << acos(normali_ptr->points [normalIndex].normal_y)*360.0/M_PI << " deg " <<  std::endl;
-		std::cout << "Orientation z :" << acos(normali_ptr->points [normalIndex].normal_z)*360.0/M_PI << " deg " <<  std::endl;
-
-		viewer->addCoordinateSystem(0.2, m_cloud_color_UPD->points [normalIndex].x, m_cloud_color_UPD->points [normalIndex].y, m_cloud_color_UPD->points [normalIndex].z);
-
-		}
-*/
 		ui->qvtkWidget->update ();
 	}
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
@@ -160,10 +134,9 @@ void   PCL_upd_DEMO::unevenessSliderChange(int value)
   {
 	QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
 
-	double _value = value/10000;
-	ui->lcdNumber_unevenness->display(value);
-	//TODO - fix this
-	//ui->lcdNumber_unevenness->display(_value);  // 100 to bring the slider integer between 0-100 to 0-1 as unevenness index value
+	double _value = value/10000.0;
+	ui->lcdNumber_unevenness->setSmallDecimalPoint(true);
+	ui->lcdNumber_unevenness->display(double(_value));  // 100 to bring the slider integer between 0-100 to 0-1 as unevenness index value
 	
 	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
   }

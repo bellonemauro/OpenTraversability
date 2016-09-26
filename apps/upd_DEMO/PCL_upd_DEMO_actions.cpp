@@ -54,9 +54,11 @@ void PCL_upd_DEMO::openFile()
     QString cloud_path = QFileDialog::getOpenFileName (this, tr("Open cloud"), QDir::currentPath(),  // dialog to open files
                         "ASCII Point Cloud File (*.pcd);; Binary Cloud File (*.bin);; All Files(*.*)" , 0);
 
-    if (pcl::io::loadPCDFile (cloud_path.toUtf8().constData(), *m_cloud) == -1) QMessageBox::warning(this, "Warning !", "File not found ! <br>" + cloud_path);
-                //cout << "Loaded " << cloud->size () << " data points from " << m_file_pcd_list.at(0) << endl;
-
+    if (pcl::io::loadPCDFile (cloud_path.toUtf8().constData(), *m_cloud) == -1){ 
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+		QMessageBox::warning(this, "Warning !", "File not found ! <br>" + cloud_path);
+	}
+        
    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
    ui->label_fileStatus_cloud->setText(QString::fromStdString(cloud_path.toUtf8().constData()));  // set the status bar to the current pcd
@@ -72,20 +74,13 @@ void PCL_upd_DEMO::openImage()
      if (!fileName.isEmpty()) {
          QImage image(fileName);
          if (image.isNull()) {
+			QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
              QMessageBox::information(this, tr("Image Viewer"),
                                       tr("Cannot load %1.").arg(fileName));
-        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
         return;
          }
          ui->label_image->setPixmap(QPixmap::fromImage(image));
-         //scaleFactor = 1.0;
-
-         //printAct->setEnabled(true);
-         //fitToWindowAct->setEnabled(true);
-         //updateActions();
-
-         //if (!fitToWindowAct->isChecked())
-             ui->label_image->adjustSize();
+         ui->label_image->adjustSize();
      }
 }
 
@@ -134,7 +129,7 @@ void PCL_upd_DEMO::openPCDFolder ()
         file_pcd_list = m_dir.entryList( nameFilter, QDir::Files | QDir::NoDotAndDotDot );
 
         m_file_pcd_list.clear();
-        for (size_t i=0; i < file_pcd_list.size(); i++)
+        for (unsigned int i=0; i < file_pcd_list.size(); i++)
         {
             QString file_with_absolute_path = m_dir.path();
             std::cout << file_pcd_list.at(i).toStdString() << std::endl;
