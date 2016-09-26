@@ -31,6 +31,7 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
 
 
   _label_counter = 0;
+  m_patch_labelling_index = 0;
   m_labelling_active = false;
   m_labelled_paused = false;
 
@@ -63,9 +64,12 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
      ui->scrollArea_image->setBackgroundRole(QPalette::Dark);
      //ui->scrollArea_image->setWidget(ui->label_image);
      //setCentralWidget(ui->scrollArea_image);
+  ui->treeWidget_classification->resizeColumnToContents(0);
+  ui->treeWidget_classification->resizeColumnToContents(1);
+  ui->treeWidget_classification->resizeColumnToContents(2);
+  ui->treeWidget_classification->resizeColumnToContents(3);
 
-
-  // Set up the QVTK window
+      // Set up the QVTK window
   viewer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
   ui->qvtkWidget->SetRenderWindow (viewer->getRenderWindow ());
   viewer->setupInteractor (ui->qvtkWidget->GetInteractor (), ui->qvtkWidget->GetRenderWindow ());
@@ -98,8 +102,12 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->pushButton_ground, SIGNAL(clicked()), this, SLOT (labelGround()));
   connect (ui->pushButton_notGround, SIGNAL(clicked()), this, SLOT (labelNotGround()));
   connect (ui->pushButton_clearLabelling, SIGNAL(clicked()), this, SLOT (clearLabelling()));
-  
-  
+  connect (ui->pushButton_train, SIGNAL(clicked()), this, SLOT (trainClassifier()));
+  connect (ui->pushButton_saveTrainingSet, SIGNAL(clicked()), this, SLOT (saveTrainingDataset()));
+  connect (ui->pushButton_classModel, SIGNAL(clicked()), this, SLOT (saveClassifierModel()));
+  connect (ui->pushButton_classify, SIGNAL(clicked()), this, SLOT (classification()));
+  connect (ui->pushButton_smvTest, SIGNAL(clicked()), this, SLOT (classificationTest()));
+
   // sliders
   connect (ui->horizontalSlider_p, SIGNAL (valueChanged (int)), this, SLOT (pointSizeSliderValueChanged (int)));
   connect (ui->horizontalSlider_unevennessIndex, SIGNAL (valueChanged (int)), this, SLOT (unevenessSliderChange (int)));
@@ -317,12 +325,67 @@ void PCL_upd_DEMO::pp_callback ( const pcl::visualization::PointPickingEvent& ev
       return;
   };
   extractPatch(patch_size, current_point.x, current_point.y, current_point.z);
+
+  // the patch has no points to run the PCA,
+  // better to not perform normal analysis
+  if (m_cloud_patch->size()<3) {
+             QMessageBox::information(this, "info !", " Not enough points,\nextract anothe patch ");
+      return;
+  }
+
+  // we run the UPD on the patch on click
+  runUPDpatch( );
+
+  // K nearest neighbor search
+  pcl::KdTreeFLANN<pcl::PointSurfel> kdtree;
+  kdtree.setInputCloud (UPD_cloud);
+  int K = 1;
+  std::vector<int> pointIdxNKNSearch(K);
+  std::vector<float> pointNKNSquaredDistance(K);
+  pcl::PointCloud<pcl::PointSurfel>::Ptr search_point (new pcl::PointCloud<pcl::PointSurfel>);
+  //cout << "PCL_upd_DEMO::labelGround:: MESSAGE m_clicked_points_3d = " << m_clicked_points_3d->points[0] << std::endl;
+  search_point->resize(1);
+  {
+   search_point->points[0].x = m_clicked_points_3d->points[0].x;
+   search_point->points[0].y = m_clicked_points_3d->points[0].y;
+   search_point->points[0].z = m_clicked_points_3d->points[0].z;
+  }
+
+  if ( kdtree.nearestKSearch (search_point->at(0), K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
+  {
+    std::cout << " Found " << pointIdxNKNSearch.size () << " points " <<std::endl;
+    // pointIdxNKNSearch[0] is the point we are looking for
+  }
+
+  // visualize an arrow in the point
+  double norm = Eigen::Vector3d(UPD_cloud->points[ pointIdxNKNSearch[0] ].normal_x,
+          UPD_cloud->points[ pointIdxNKNSearch[0] ].normal_y, UPD_cloud->points[ pointIdxNKNSearch[0] ].normal_z).norm();
+
+  pcl::PointXYZ P1 ( UPD_cloud->points[ pointIdxNKNSearch[0] ].x + UPD_cloud->points[ pointIdxNKNSearch[0] ].normal_x/norm,
+                     UPD_cloud->points[ pointIdxNKNSearch[0] ].y + UPD_cloud->points[ pointIdxNKNSearch[0] ].normal_y/norm,
+                     UPD_cloud->points[ pointIdxNKNSearch[0] ].z + UPD_cloud->points[ pointIdxNKNSearch[0] ].normal_z/norm);
+  pcl::PointXYZ P2 ( UPD_cloud->points[ pointIdxNKNSearch[0] ].x,
+                     UPD_cloud->points[ pointIdxNKNSearch[0] ].y,
+                     UPD_cloud->points[ pointIdxNKNSearch[0] ].z);
+
+  m_patch_labelling_index = pointIdxNKNSearch[0];
+
+  // as we still don't know whether is ground or not we visualize it as grey
+  if(viewer->addArrow(P1, P2, 0.2, 0.2, 0.2, false, "arrow", 0)) //the arrow is attached to P1
+      ui->qvtkWidget->update ();
+  else { viewer->removeShape("arrow",0);
+  viewer->addArrow(P1, P2, 0.2, 0.2, 0.2, false, "arrow", 0);
+  ui->qvtkWidget->update ();
+  }
+
 }
 
 void PCL_upd_DEMO::addRemoveCoordinateSystem()
 {
   if (ui->checkBox_coordinateSystem->isChecked()) viewer->addCoordinateSystem ( );
   else viewer->removeCoordinateSystem ( );
+
+  ui->qvtkWidget->update ();
 }
 
 

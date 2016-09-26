@@ -33,8 +33,11 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/kdtree/kdtree_flann.h>
 //for transformation
 #include <pcl/registration/transforms.h>
+// this is the only header to be included to implement a cloud SVM classifier
+#include <pcl/ml/svm_wrapper.h>
 
 // Visualization Toolkit (VTK)
 #include <vtkRenderWindow.h>
@@ -277,6 +280,24 @@ private slots:
   void 
   runUPD();
 
+  void
+  runUPDpatch();
+
+  void
+  trainClassifier();
+
+  void
+  saveClassifierModel();
+
+  void
+  saveTrainingDataset();
+
+  void
+  classificationTest();
+
+  void
+  classification();
+
   /** visualize the about dialog
  * \note
  */
@@ -291,7 +312,8 @@ private slots:
 
 protected:
   
-
+  void
+  addSVMdataToTrainingSet(float _f1, float _f2, float _f3, float _label );
 	
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
   PointCloudT::Ptr m_cloud;           			//--> allocate a cloud for visualization and data processing
@@ -305,7 +327,6 @@ protected:
 
   pcl::visualization::PointCloudColorHandlerRGBField<PointT> m_rgb_color;
 
-
   upd *m_upd;
   pcl::PointCloud<pcl::PointSurfel>::Ptr UPD_cloud;     //--> processed cloud
   Eigen::Affine3f m_transformation;             //--> transformation matrix
@@ -317,10 +338,18 @@ protected:
   QStringList m_file_pcd_list;     //--> vector of paths to pcd files
   QStringList m_file_image_list;   //--> vector of paths to pcd files
 
+  pcl::SVMTrain m_svm_trainer; //--> our trainer, to be used for store training data or for a new training procedure
+  pcl::SVMClassify m_svm_classifier;  //--> our classifier
+  pcl::SVMModel m_svm_model;   //--> classifier model, this is automatically generated after the training or loaded for the classification
+  pcl::SVMParam m_svm_parameters; //--> our own configuration parameters
+  std::vector<pcl::SVMData> m_training_set;   //--> the training set is a vector of data
+  std::vector<pcl::SVMData> m_test_set;   //--> the test set is a vector of data
+
   unsigned int red;
   unsigned int green;
   unsigned int blue;
   unsigned int _label_counter;
+  unsigned int m_patch_labelling_index;
   bool m_labelling_active;
   bool m_labelled_paused;
 

@@ -56,7 +56,7 @@
            <x>0</x>
            <y>0</y>
            <width>1288</width>
-           <height>825</height>
+           <height>819</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
@@ -104,7 +104,7 @@
                <x>0</x>
                <y>0</y>
                <width>630</width>
-               <height>530</height>
+               <height>524</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -145,7 +145,7 @@
                <x>0</x>
                <y>0</y>
                <width>630</width>
-               <height>530</height>
+               <height>524</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -165,7 +165,7 @@
              </size>
             </property>
             <property name="currentIndex">
-             <number>3</number>
+             <number>4</number>
             </property>
             <widget class="QWidget" name="PointClouds">
              <attribute name="title">
@@ -1079,41 +1079,13 @@
               <string>Manual Labelling</string>
              </attribute>
              <layout class="QGridLayout" name="gridLayout_3">
-              <item row="5" column="0" colspan="2">
-               <widget class="QPushButton" name="pushButton_clearLabelling">
+              <item row="1" column="1">
+               <widget class="QPushButton" name="pushButton_removePoint">
                 <property name="enabled">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                 <property name="text">
-                 <string>Clear</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="3" rowspan="7">
-               <widget class="QTreeWidget" name="treeWidget_classification">
-                <column>
-                 <property name="text">
-                  <string>classification</string>
-                 </property>
-                </column>
-                <column>
-                 <property name="text">
-                  <string>Points</string>
-                 </property>
-                </column>
-               </widget>
-              </item>
-              <item row="6" column="0">
-               <widget class="QLabel" name="label">
-                <property name="text">
-                 <string>Patch size (m)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0" colspan="2">
-               <widget class="QPushButton" name="pushButton_start_stopLabelling">
-                <property name="text">
-                 <string>Start/Stop Labelling</string>
+                 <string>-</string>
                 </property>
                </widget>
               </item>
@@ -1127,6 +1099,13 @@
                 </property>
                </widget>
               </item>
+              <item row="1" column="4" colspan="2">
+               <widget class="QPushButton" name="pushButton_train">
+                <property name="text">
+                 <string>train the classifier</string>
+                </property>
+               </widget>
+              </item>
               <item row="3" column="0" colspan="2">
                <widget class="QPushButton" name="pushButton_ground">
                 <property name="enabled">
@@ -1137,7 +1116,30 @@
                 </property>
                </widget>
               </item>
-              <item row="6" column="1">
+              <item row="1" column="0">
+               <widget class="QPushButton" name="pushButton_addPoint">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>+</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="5">
+               <widget class="QLineEdit" name="lineEdit_SVMc">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="1">
                <widget class="QLineEdit" name="lineEdit_patchSize">
                 <property name="maximumSize">
                  <size>
@@ -1146,21 +1148,157 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>0.0</string>
+                 <string>0.50</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QPushButton" name="pushButton_addPoint">
+              <item row="0" column="4" colspan="2">
+               <widget class="QPushButton" name="pushButton_saveTrainingSet">
                 <property name="text">
-                 <string>+</string>
+                 <string>save training set</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
-               <widget class="QPushButton" name="pushButton_removePoint">
+              <item row="2" column="4" colspan="2">
+               <widget class="QPushButton" name="pushButton_classModel">
                 <property name="text">
-                 <string>-</string>
+                 <string>save classifier model</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3" rowspan="8">
+               <widget class="QTreeWidget" name="treeWidget_classification">
+                <column>
+                 <property name="text">
+                  <string>classification</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Patch central point</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Global Orientation</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Unevenness Value</string>
+                 </property>
+                </column>
+               </widget>
+              </item>
+              <item row="5" column="4">
+               <widget class="QComboBox" name="comboBox_svmKernelType">
+                <property name="minimumSize">
+                 <size>
+                  <width>130</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Kernel type</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>LINEAR</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>POLY</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>RBF</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>SIGMOID</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>PRECOMPUTED</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="3" column="5">
+               <widget class="QLineEdit" name="lineEdit_SVMgamma">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>0.05</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="4">
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>C</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="4">
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Gamma</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" colspan="2">
+               <widget class="QPushButton" name="pushButton_start_stopLabelling">
+                <property name="text">
+                 <string>Start/Stop Labelling</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="5">
+               <widget class="QCheckBox" name="checkBox_Shrinking">
+                <property name="text">
+                 <string>Shrinking</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>Patch size (m)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0" colspan="2">
+               <widget class="QPushButton" name="pushButton_clearLabelling">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Clear</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="4">
+               <widget class="QPushButton" name="pushButton_classify">
+                <property name="text">
+                 <string>What's this?</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="5">
+               <widget class="QPushButton" name="pushButton_smvTest">
+                <property name="text">
+                 <string>SVM test</string>
                 </property>
                </widget>
               </item>
@@ -1182,7 +1320,7 @@
      <x>0</x>
      <y>0</y>
      <width>1310</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

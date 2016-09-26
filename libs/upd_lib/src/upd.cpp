@@ -61,7 +61,8 @@ void upd::runUPD_kSearch()
     input_cloud->resize(input_cloud->size()*1);
     ne.setRadiusSearch (m_search_radius);
     ne.setInputCloud(input_cloud);
-	ne.setViewPoint(m_viewpoint[0], m_viewpoint[1], m_viewpoint[2]);
+    ne.setViewPoint (std::numeric_limits<float>::max (), std::numeric_limits<float>::max (), std::numeric_limits<float>::max ());
+    //ne.setViewPoint(m_viewpoint[0], m_viewpoint[1], m_viewpoint[2]);
 	//float d = m_viewpoint[2];
     ne.compute(*normals);/**/
 

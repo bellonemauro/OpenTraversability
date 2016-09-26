@@ -14,73 +14,35 @@
 
 void PCL_upd_DEMO::startStopLabelling()
 {
-	if (ui->horizontalSlider_p->value() != 1 )    //set the visualization to the minimum point size if not already done --- only for visualization
-	{ 
-		ui->horizontalSlider_p->setValue(1);
-        pointSizeSliderValueChanged(1);
-	}
-
-    if (UPD_cloud->size() == 0)    {
-        QMessageBox::information(this, "info !", " Run UPD before performing a cloud labelling\nthe process needs a feature !!");
-        return;
-    }
-
 
     if (m_labelled_paused == true)
 	{
 	ui->pushButton_start_stopLabelling->setEnabled(false);
-    ui->pushButton_start_stopLabelling->setText("Start/Stop Labelling");
+//    ui->pushButton_start_stopLabelling->setText("Start/Stop Labelling");
     m_labelled_paused = false;
 	}
 
-    m_labelling_active = true;
 
-
-    QMessageBox::information(this, "info !", " Labelling procedure starting,\npress shift and click to select a patch");
-
-
-    if (_label_counter == 0 && m_labelled_paused == false)     // the first step --- deactivate button for manual labelling - activate ground and not ground  ---- then set the visualization properties
-	{ 
-		//QMessageBox::information(this, "info !", " Manual labelling procedure starting !");
-
-		ui->pushButton_start_stopLabelling->setEnabled(false);
-		ui->pushButton_ground->setEnabled(true);
-		ui->pushButton_notGround->setEnabled(true);
+    if (!m_labelling_active) // if not active, start
+    {
+        ui->pushButton_ground->setEnabled(true);
+        ui->pushButton_notGround->setEnabled(true);
         ui->pushButton_ground->setStyleSheet("color: black;"
                                              "background-color: lightgreen;"
                                              "selection-color: red;");
         ui->pushButton_notGround->setStyleSheet("color: black;"
                                              "background-color: red;"
                                              "selection-color: red;");
-
-
-		m_labeled_point->clear();
-		m_labeled_point->push_back( m_cloud->at(_label_counter));
-		m_labeled_point->at(0).rgba = 0x00FF00FF;
-        pcl::visualization::PointCloudColorHandlerCustom<PointT> rgb_color(m_labeled_point, 255, 0, 255);
-        viewer->updatePointCloud (m_labeled_point, rgb_color, "label_point");
-
-        viewer->addPointCloud(m_labeled_point, rgb_color, "label_point",0);
-		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 7, "label_point");   //5 is for bigger size - in this way the point is enphasized
-		_label_counter++;
-		return;
-	}
-
-
-    if (_label_counter < m_cloud->size() && m_labelled_paused == false)
-	{   
-		m_labeled_point->clear();
-		m_labeled_point->push_back( m_cloud->at(_label_counter));
-		m_labeled_point->at(0).rgba = 0x00FF00FF;
-
-		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 7, "label_point");   //5 is for bigger size - in this way the point is enphasized
-        pcl::visualization::PointCloudColorHandlerCustom<PointT> rgb_color(m_labeled_point, 255, 0, 255);
-        viewer->updatePointCloud (m_labeled_point, rgb_color, "label_point");
-        viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
-		ui->qvtkWidget->update ();
-		_label_counter++;
-		return;
-	}
+        m_labelling_active = true;
+    }
+    else // it was active, stop
+    {
+        ui->pushButton_ground->setEnabled(false);
+        ui->pushButton_notGround->setEnabled(false);
+        ui->pushButton_ground->setStyleSheet("");
+        ui->pushButton_notGround->setStyleSheet(""); // reset to default
+        m_labelling_active = false;
+    }
 
 }
 
@@ -88,77 +50,117 @@ void PCL_upd_DEMO::startStopLabelling()
 
 void PCL_upd_DEMO::labelGround()
 {
-m_classifiable_cloud->clear();
-    copyPatchToClassifiable(*m_cloud_patch, *m_classifiable_cloud, 1.0);
 
-std::cout << " classifiable cloud size = "<< m_classifiable_cloud->size() << std::endl;
+    // if we have no patch we cannot classify
+    if ( m_cloud_patch->size() < 1 || m_cloud_patch->size() < m_patch_labelling_index ) {
+        QMessageBox::information(this, "info !", " Patch size error !!");
+        return; }
 
-	 if (_label_counter < m_cloud->size())	
-	 { 
-		 m_labeled_cloud->push_back(m_labeled_point->at(0));
- 		 m_labeled_cloud->at(m_labeled_cloud->size()-1).rgba = 0x0000FF00;
- 		 m_cloud->at(_label_counter-1).rgba = 0x0000FF00;
-//		 cout << "PCL_upd_DEMO::labelGround:: MESSAGE --- ground --- x " << m_labeled_point->at(0).x << " y " << m_labeled_point->at(0).y << " z " << m_labeled_point->at(0).z << endl;
-		
-		 stringstream ss;
-		 ss << " x " << m_labeled_point->at(0).x << ", y = " << m_labeled_point->at(0).y << ", z =" << m_labeled_point->at(0).z;
-		 QTreeWidgetItem * item = new QTreeWidgetItem();   // and update the widget for the visualization
-		 item->setText(1,QString::fromStdString(ss.str()));
-		 item->setText(0,"Ground");
-		 ui->treeWidget_classification->insertTopLevelItem(0,item);
-		 
-		 startStopLabelling();
-	 }
-	 else //this is the last step!
-	 {
-		m_labeled_cloud->push_back(m_labeled_point->at(0));
-		m_labeled_cloud->at(m_labeled_cloud->size()-1).rgba = 0x0000FF00;
-		m_cloud->at(_label_counter-1).rgba = 0x0000FF00;
-	 	ui->pushButton_start_stopLabelling->setEnabled(true);
-		ui->pushButton_ground->setEnabled(false);
-		ui->pushButton_notGround->setEnabled(false);
-        m_labelling_active = false;
-        QMessageBox::information(this, "info !", " Congratulation you labeled all cloud !!");
+    // prepare data for the classifier
+    float f1 = tan(UPD_cloud->points[m_patch_labelling_index].normal_x / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
+    float f2 = tan(UPD_cloud->points[m_patch_labelling_index].normal_z / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
+    float f3 = UPD_cloud->points[ m_patch_labelling_index ].radius;
+    addSVMdataToTrainingSet( f1,  f2,  f3, +1.0 );
+
+     QTreeWidgetItem * item = new QTreeWidgetItem();   // and update the widget for the visualization
+     item->setText(0,"Ground");
+     stringstream ss;
+     //ss << " x " << m_labeled_point->at(0).x << ", y = " << m_labeled_point->at(0).y << ", z =" << m_labeled_point->at(0).z;
+     ss << " x " << UPD_cloud->points[ m_patch_labelling_index ].x
+        << ", y = " << UPD_cloud->points[ m_patch_labelling_index ].y
+        << ", z = " << UPD_cloud->points[ m_patch_labelling_index ].z;
+     item->setText(1,QString::fromStdString(ss.str()));
+
+     ss.str("");
+     ss << " angle = " << f1 << " deg "
+                       << f2 << " deg ";
+     item->setText(3,QString::fromStdString(ss.str()) );
+     ss.str("");
+     ss << " upd = " << f3;
+     item->setText(2,QString::fromStdString(ss.str()) );
+
+
+     ui->treeWidget_classification->resizeColumnToContents(0);
+     ui->treeWidget_classification->resizeColumnToContents(1);
+     ui->treeWidget_classification->resizeColumnToContents(2);
+     ui->treeWidget_classification->resizeColumnToContents(3);
+
+     ui->treeWidget_classification->insertTopLevelItem(0,item);
+
+     double norm = Eigen::Vector3d(UPD_cloud->points[ m_patch_labelling_index ].normal_x,
+             UPD_cloud->points[ m_patch_labelling_index ].normal_y, UPD_cloud->points[ m_patch_labelling_index ].normal_z).norm();
+
+     pcl::PointXYZ P1 ( UPD_cloud->points[ m_patch_labelling_index ].x + UPD_cloud->points[ m_patch_labelling_index ].normal_x/norm,
+                        UPD_cloud->points[ m_patch_labelling_index ].y + UPD_cloud->points[ m_patch_labelling_index ].normal_y/norm,
+                        UPD_cloud->points[ m_patch_labelling_index ].z + UPD_cloud->points[ m_patch_labelling_index ].normal_z/norm);
+     pcl::PointXYZ P2 ( UPD_cloud->points[ m_patch_labelling_index ].x,
+                        UPD_cloud->points[ m_patch_labelling_index ].y,
+                        UPD_cloud->points[ m_patch_labelling_index ].z);
+
+     if(viewer->addArrow(P1, P2, 0.0, 1.0, 0.0, false, "arrow", 0)) //the arrow is attached to P1
+         ui->qvtkWidget->update ();
+     else { viewer->removeShape("arrow",0);
+     viewer->addArrow(P1, P2, 0.0, 1.0, 0.0, false, "arrow", 0);
      }
+     ui->qvtkWidget->update ();
 
 }
 
 void PCL_upd_DEMO::labelNotGround()
 {
-    m_classifiable_cloud->clear();
-        copyPatchToClassifiable(*m_cloud_patch, *m_classifiable_cloud, -1.0);
+  // if we have no patch we cannot classify
+    if ( m_cloud_patch->size() < 1 || m_cloud_patch->size() < m_patch_labelling_index ) {
+        QMessageBox::information(this, "info !", " Patch size error !!");
+        return; }
 
-        if (_label_counter < m_cloud->size())
-	 { 
-		 
-		 m_labeled_cloud->push_back(m_labeled_point->at(0));
- 		 m_labeled_cloud->at(m_labeled_cloud->size()-1).rgba = 0x00FF0000;
-		 m_cloud->at(_label_counter-1).rgba = 0x00FF0000;
-//		 cout << "PCL_upd_DEMO::labelGround:: MESSAGE --- not ground --- x " << m_labeled_point->at(0).x << " y " << m_labeled_point->at(0).y << " z " << m_labeled_point->at(0).z << endl;
+    // prepare data for the classifier
+    float f1 = tan(UPD_cloud->points[m_patch_labelling_index].normal_x / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
+    float f2 = tan(UPD_cloud->points[m_patch_labelling_index].normal_z / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
+    float f3 = UPD_cloud->points[ m_patch_labelling_index ].radius;
+    addSVMdataToTrainingSet( f1,  f2,  f3, -1.0 );
 
-		 stringstream ss;
-		 ss << " x " << m_labeled_point->at(0).x << ", y = " << m_labeled_point->at(0).y << ", z =" << m_labeled_point->at(0).z;
-		 QTreeWidgetItem * item = new QTreeWidgetItem();   // and update the widget for the visualization
-		 item->setText(1,QString::fromStdString(ss.str()));
-		 item->setText(0,"NOT Ground");
-		 ui->treeWidget_classification->insertTopLevelItem(0,item);
-		 
-		 startStopLabelling(); 
+     QTreeWidgetItem * item = new QTreeWidgetItem();   // and update the widget for the visualization
+     item->setText(0,"NOT Ground");
+     stringstream ss;
+     //ss << " x " << m_labeled_point->at(0).x << ", y = " << m_labeled_point->at(0).y << ", z =" << m_labeled_point->at(0).z;
+     ss << " x " << UPD_cloud->points[ m_patch_labelling_index ].x
+        << ", y = " << UPD_cloud->points[ m_patch_labelling_index ].y
+        << ", z = " << UPD_cloud->points[ m_patch_labelling_index ].z;
+     item->setText(1,QString::fromStdString(ss.str()));
 
-	 }
-	 else //this is the last step!
-	 {		
-		m_labeled_cloud->push_back(m_labeled_point->at(0));
- 		m_labeled_cloud->at(m_labeled_cloud->size()-1).rgba = 0x00FF0000;
-		m_cloud->at(_label_counter-1).rgba = 0x00FF0000;
-	 	ui->pushButton_start_stopLabelling->setEnabled(true);
-		ui->pushButton_ground->setEnabled(false);
-		ui->pushButton_notGround->setEnabled(false);
-        m_labelling_active = false;
-		QMessageBox::information(this, "info !", " Congratulation you labeled all cloud !!");
-	 }
+     ss.str("");
+     ss << " angle = " << f1 << " deg "
+                       << f2 << " deg ";
+     item->setText(3,QString::fromStdString(ss.str()) );
+     ss.str("");
+     ss << " upd = " << f3;
+     item->setText(2,QString::fromStdString(ss.str()) );
+
+
+     ui->treeWidget_classification->resizeColumnToContents(0);
+     ui->treeWidget_classification->resizeColumnToContents(1);
+     ui->treeWidget_classification->resizeColumnToContents(2);
+     ui->treeWidget_classification->resizeColumnToContents(3);
+
+     ui->treeWidget_classification->insertTopLevelItem(0,item);
+
+     double norm = Eigen::Vector3d(UPD_cloud->points[ m_patch_labelling_index ].normal_x,
+             UPD_cloud->points[ m_patch_labelling_index ].normal_y, UPD_cloud->points[ m_patch_labelling_index ].normal_z).norm();
+
+     pcl::PointXYZ P1 ( UPD_cloud->points[ m_patch_labelling_index ].x + UPD_cloud->points[ m_patch_labelling_index ].normal_x/norm,
+                        UPD_cloud->points[ m_patch_labelling_index ].y + UPD_cloud->points[ m_patch_labelling_index ].normal_y/norm,
+                        UPD_cloud->points[ m_patch_labelling_index ].z + UPD_cloud->points[ m_patch_labelling_index ].normal_z/norm);
+     pcl::PointXYZ P2 ( UPD_cloud->points[ m_patch_labelling_index ].x,
+                        UPD_cloud->points[ m_patch_labelling_index ].y,
+                        UPD_cloud->points[ m_patch_labelling_index ].z);
+
+     if(viewer->addArrow(P1, P2, 0.0, 1.0, 0.0, false, "arrow", 0)) //the arrow is attached to P1
+         ui->qvtkWidget->update ();
+     else { viewer->removeShape("arrow",0);
+     viewer->addArrow(P1, P2, 1.0, 0.0, 0.0, false, "arrow", 0);
+     }ui->qvtkWidget->update ();
+
 }
-
 
 
 
@@ -262,6 +264,240 @@ void PCL_upd_DEMO::extractPatch(double _size, float _x, float _y, float _z)
 }
 
 
+
+void PCL_upd_DEMO::addSVMdataToTrainingSet(float _f1, float _f2, float _f3, float _label )
+{
+
+    pcl::SVMDataPoint svm_data_point; //--> a data point just for simplicity
+    pcl::SVMData svm_data;
+
+    svm_data.label = _label;
+
+    svm_data_point.idx = 1;
+    svm_data_point.value = _f1;
+    svm_data.SV.push_back(svm_data_point);
+
+    svm_data_point.idx = 2;
+    svm_data_point.value = _f2;
+    svm_data.SV.push_back(svm_data_point);
+
+    svm_data_point.idx = 3;
+    svm_data_point.value = _f3;
+    svm_data.SV.push_back(svm_data_point);
+
+    m_training_set.push_back(svm_data);
+}
+
+
+
+void
+PCL_upd_DEMO::trainClassifier()
+{
+    // TODO: let the user configure this parameters from the command line !
+    m_svm_parameters.kernel_type = RBF;
+    m_svm_parameters.shrinking = 1;//ui->checkBox_Shrinking->isChecked();
+
+    double gamma = 0;
+    bool isNumeric;
+    gamma = ui->lineEdit_SVMgamma->text().toDouble(&isNumeric);
+    if(!isNumeric)
+    {
+        QMessageBox::warning(this, "Warning !", "GAMMA is not a valid number !");
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    };
+    m_svm_parameters.gamma = gamma;
+
+    double c = 0;
+    c = ui->lineEdit_SVMc->text().toDouble(&isNumeric);
+    if(!isNumeric)
+    {
+        QMessageBox::warning(this, "Warning !", "C is not a valid number !");
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    };
+    m_svm_parameters.C = c;
+    m_svm_parameters.probability = 1;
+    m_svm_trainer.setParameters(m_svm_parameters);  // set the parameters for the trainer
+
+
+    m_svm_trainer.setInputTrainingSet(m_training_set);
+
+    // train the classifier
+    if (m_svm_trainer.trainClassifier() )
+       {
+         std::cout << "\t The classifier has been successfully tranined \n\n";
+       }
+    else
+       {
+         std::cout << "\t The classifier has NOT been tranined  - Exit now ! \n\n";
+         return ;
+       }
+
+    // check the model for the classifier
+    m_svm_model = m_svm_trainer.getClassifierModel();
+
+    std::cout << "\t Model parameters summary : \n";
+    if ((m_svm_parameters.probability?true:false)){
+        std::cout << "\t\t  Probability support \t active  \n";
+        std::cout << "\t\t  ProbA = \t" << *m_svm_model.probA << " \n"
+                  << "\t\t  ProbB = \t" << *m_svm_model.probB << " \n";
+    }
+    else {
+     std::cout << "\t\t  Probability support \t NOT active  \n";
+    }
+    std::cout << "\t\t  l  \t \t \t " << m_svm_model.l  << " \n";
+    std::cout << "\t\t  Number of classes   \t " << m_svm_model.nr_class << " \n";
+    std::cout << "\t\t  sv_coef   \t  \t " <<  *(*m_svm_model.sv_coef) << " \n";
+    std::cout << "\t\t  Rho   \t  \t " <<  *m_svm_model.rho << " \n";
+    std::cout << "\t\t  label   \t  \t " <<  *m_svm_model.label << " \n";
+    std::cout << "\t\t  nSV \t   \t  \t " <<  *m_svm_model.nSV << " \n\n";
+
+}
+
+void
+PCL_upd_DEMO::saveClassifierModel()
+{
+// TODO check if the model is valid
+
+    if ( m_svm_trainer.saveClassifierModel("./model_out.dat") )
+       {
+         std::cout << "\t Generated classifier model saved in ./model_out.dat \n";
+       }
+    else {
+         std::cout << "\t Generated classifier model not saved. Exit now.  \n\n";
+         return;
+       }
+}
+
+void
+PCL_upd_DEMO::saveTrainingDataset()
+{
+
+    if (m_training_set.size()<1 ) {
+        std::cout << " NO data to be saved, return" << std::endl;
+        return;
+    }
+
+    if ( m_svm_trainer.saveTrainingSet("./train_out.dat") )
+       {
+         std::cout << "\t Training results saved in ./train_out.dat \n";
+       }
+    else {
+         std::cout << "\t training results not saved. Exit now.  \n\n";
+         return;
+       }
+
+}
+void PCL_upd_DEMO::classification()
+{
+
+    pcl::SVMDataPoint svm_data_point; //--> a data point just for simplicity
+    pcl::SVMData svm_data;
+    float f1 = tan(UPD_cloud->points[m_patch_labelling_index].normal_x / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
+    float f2 = tan(UPD_cloud->points[m_patch_labelling_index].normal_z / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
+    float f3 = UPD_cloud->points[ m_patch_labelling_index ].radius;
+
+    svm_data_point.idx = 1;
+    svm_data_point.value = f1;
+    svm_data.SV.push_back(svm_data_point);
+
+    svm_data_point.idx = 2;
+    svm_data_point.value = f2;
+    svm_data.SV.push_back(svm_data_point);
+
+    svm_data_point.idx = 3;
+    svm_data_point.value = f3;
+    svm_data.SV.push_back(svm_data_point);
+
+    std::vector<pcl::SVMData> test_set;
+    test_set.push_back(svm_data);
+
+    m_svm_classifier.setClassifierModel(m_svm_model);
+
+    m_svm_classifier.setProbabilityEstimates((m_svm_parameters.probability?true:false));
+    m_svm_classifier.resetTrainingSet();
+    m_svm_classifier.setInputTrainingSet(test_set);
+
+    if ( m_svm_classifier.classification( ) )
+      std::cout << "\t Classification DONE ! \n";
+    else {
+      std::cout << "\t Classification ERROR --- Exit now ! \n\n";
+      return ;
+    }
+std::vector< std::vector<double> > classification_result;
+
+m_svm_classifier.getClassificationResult(classification_result);
+std::cout << "\t  Classification result size = \t  " << classification_result.size() << " \n";
+std::cout << "\t  Classification result = \t  " << classification_result.at(0).at(0) << " \n";
+
+if (classification_result.at(0).at(0) == 1 ) QMessageBox::information(this, "info !", " it's ground!!");
+
+if (classification_result.at(0).at(0) == -1 ) QMessageBox::information(this, "info !", " it's NOT ground!!");
+
+}
+
+void PCL_upd_DEMO::classificationTest()
+{
+
+m_svm_classifier.setClassifierModel(m_svm_model);
+
+m_svm_classifier.setProbabilityEstimates((m_svm_parameters.probability?true:false));
+m_svm_classifier.resetTrainingSet();
+//m_svm_classifier.setInputTrainingSet(m_test_set);
+m_svm_classifier.setInputTrainingSet(m_training_set);
+
+if ( m_svm_classifier.classification( ) )
+  std::cout << "\t Classification DONE ! \n";
+else {
+  std::cout << "\t Classification ERROR --- Exit now ! \n\n";
+  return ;
+}
+
+// set some vars for the test report
+int number_of_positive_samples = 0;
+int number_of_negative_samples = 0;
+int number_of_unclassified_samples = 0;
+std::vector< std::vector<double> > classification_result;
+
+if ( m_svm_classifier.hasLabelledTrainingSet())
+{
+    std::cout << "\t Loaded dataset has labels, the classification test will run \n";
+if ( m_svm_classifier.classificationTest( ) ) {
+  m_svm_classifier.getClassificationResult(classification_result);
+  std::cout << "\t Classification result size = \t  " << classification_result.size() << " \n";
+  std::cout << "\t Classification test SUCCESS ! \n\n";
+}
+else  {
+  std::cout << "\t Classification test NOT SUCCESS \n\n";  }
+}
+else std::cout << "\t Loaded dataset has NO labels, the classification test cannot be executed \n";
+
+m_svm_classifier.getClassificationResult(classification_result);
+std::cout << "\t  Classification result size = \t  " << classification_result.size() << " \n";
+for (size_t i = 0; i < classification_result.size(); i++) {
+ for (size_t j = 0; j < classification_result.at(i).size(); j++) {
+    if ( classification_result.at(i).at(j) == 1 ) {
+        number_of_positive_samples++;
+      }
+    else {
+      if ( classification_result.at(i).at(j) == -1) {
+         number_of_negative_samples++; }
+      else {
+         number_of_unclassified_samples++;
+       }
+     }
+  }
+}
+std::cout << "\n\t Classification Results : \n";
+std::cout << "\t\t  number of positive samples = \t " << number_of_positive_samples << " \n";
+std::cout << "\t\t  number of negative samples = \t " << number_of_negative_samples << " \n";
+std::cout << "\t\t  number of unclassified samples = \t " << number_of_unclassified_samples << " \n";
+std::cout << "\t NOTE: using probability parameter will always results in \n"
+          << "\t       high number of unclassified samples \n\n";
+
+
+}
 
 void PCL_upd_DEMO::clearLabelling()
 {

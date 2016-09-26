@@ -72,7 +72,60 @@
 
   }
 
+  void PCL_upd_DEMO::runUPDpatch()
+  {
+  m_upd = new upd; ///-->substitute with pathc
+   QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+   //QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
+    if (ui->checkBox_applyTrans->isChecked())
+    {
+        ui->checkBox_applyTransformation->setChecked(true);
+        applyTransformation();
+    }
+
+
+
+    m_upd->setInputCloud(m_cloud_patch);
+    m_upd->setFlip(false);//(ui->checkBox_filpNormals->isChecked());
+
+    if (ui->radioButton_kNeighbors->isChecked())
+    {
+    int k_neighbors = 0;
+    bool isNumeric;
+    k_neighbors = ui->lineEdit_searchRadius->text().toDouble(&isNumeric);
+    if(!isNumeric)
+    {
+        QMessageBox::warning(this, "Warning !", "K must be an integer number - the UPD cannot be applied !");
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    }
+    m_upd->setSearchRadius(k_neighbors);
+    m_upd->runUPD_kSearch();
+    }
+    else
+    {
+    double search_radius = 0.5;
+    bool isNumeric;
+    search_radius = ui->lineEdit_searchRadius->text().toDouble(&isNumeric);
+    if(!isNumeric)
+    {
+        QMessageBox::warning(this, "Warning !", "Search radius is not a valid number - the UPD cannot be applied !");
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    }
+    m_upd->setSearchRadius(search_radius);
+    m_upd->runUPD_radius();
+    }
+
+
+    UPD_cloud = m_upd->getUPD( );
+
+ QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+
+// QMessageBox::warning(this, "Warning !", "upd properly generated with size " + QString::number( UPD_cloud->size() ) );
+
+  }
 
 void PCL_upd_DEMO::switchVisualization()
 {

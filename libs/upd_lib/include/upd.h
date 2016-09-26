@@ -62,6 +62,12 @@ public:
     inline void setInputCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &_input_cloud) 
 							{ pcl::copyPointCloud(*_input_cloud, *input_cloud); }
 
+    /* Set input cloud
+     *
+     **/
+    inline void setInputCloud(pcl::PointCloud<pcl::PointSurfel>::Ptr &_input_cloud)
+                            { pcl::copyPointCloud(*_input_cloud, *input_cloud); }
+
     /* Set the use of flipNormalsTowardViewPoint to avoid sign misinterpretation issues
      *
      **/
