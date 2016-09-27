@@ -288,14 +288,11 @@ void PCL_upd_DEMO::addSVMdataToTrainingSet(float _f1, float _f2, float _f3, floa
     m_training_set.push_back(svm_data);
 }
 
-
-
 void
-PCL_upd_DEMO::trainClassifier()
+PCL_upd_DEMO::getGUIclassifierParams()
 {
-    // TODO: let the user configure this parameters from the command line !
     m_svm_parameters.kernel_type = RBF;
-    m_svm_parameters.shrinking = 1;//ui->checkBox_Shrinking->isChecked();
+    m_svm_parameters.shrinking = ui->checkBox_Shrinking->isChecked();//
 
     double gamma = 0;
     bool isNumeric;
@@ -317,10 +314,17 @@ PCL_upd_DEMO::trainClassifier()
         return;
     };
     m_svm_parameters.C = c;
-    m_svm_parameters.probability = 1;
+    m_svm_parameters.probability = ui->checkBox_probability->isChecked();
+
+}
+
+void
+PCL_upd_DEMO::trainClassifier()
+{
+    getGUIclassifierParams();
     m_svm_trainer.setParameters(m_svm_parameters);  // set the parameters for the trainer
 
-
+    m_svm_trainer.resetTrainingSet();
     m_svm_trainer.setInputTrainingSet(m_training_set);
 
     // train the classifier
@@ -355,47 +359,24 @@ PCL_upd_DEMO::trainClassifier()
 
 }
 
-void
-PCL_upd_DEMO::saveClassifierModel()
-{
-// TODO check if the model is valid
 
-    if ( m_svm_trainer.saveClassifierModel("./model_out.dat") )
-       {
-         std::cout << "\t Generated classifier model saved in ./model_out.dat \n";
-       }
-    else {
-         std::cout << "\t Generated classifier model not saved. Exit now.  \n\n";
-         return;
-       }
-}
-
-void
-PCL_upd_DEMO::saveTrainingDataset()
-{
-
-    if (m_training_set.size()<1 ) {
-        std::cout << " NO data to be saved, return" << std::endl;
-        return;
-    }
-
-    if ( m_svm_trainer.saveTrainingSet("./train_out.dat") )
-       {
-         std::cout << "\t Training results saved in ./train_out.dat \n";
-       }
-    else {
-         std::cout << "\t training results not saved. Exit now.  \n\n";
-         return;
-       }
-
-}
 void PCL_upd_DEMO::classification()
 {
 
     pcl::SVMDataPoint svm_data_point; //--> a data point just for simplicity
     pcl::SVMData svm_data;
-    float f1 = tan(UPD_cloud->points[m_patch_labelling_index].normal_x / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
-    float f2 = tan(UPD_cloud->points[m_patch_labelling_index].normal_z / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
+
+    if (UPD_cloud->empty() || UPD_cloud->size() < m_patch_labelling_index) {
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        QMessageBox::warning(this, "Warning !", "UPD cloud cannot be labelled  ! " );
+        return;
+    }
+
+
+    float f1 = tan(UPD_cloud->points[m_patch_labelling_index].normal_x /
+                   UPD_cloud->points[m_patch_labelling_index].normal_y ) * 360.0/M_PI;
+    float f2 = tan(UPD_cloud->points[m_patch_labelling_index].normal_z /
+                   UPD_cloud->points[m_patch_labelling_index].normal_y ) * 360.0/M_PI;
     float f3 = UPD_cloud->points[ m_patch_labelling_index ].radius;
 
     svm_data_point.idx = 1;
@@ -413,9 +394,16 @@ void PCL_upd_DEMO::classification()
     std::vector<pcl::SVMData> test_set;
     test_set.push_back(svm_data);
 
+    if(!m_svm_model.isValid() ){
+        std::cout << " null model" << std::endl;
+        return;
+    }
     m_svm_classifier.setClassifierModel(m_svm_model);
 
+    getGUIclassifierParams();
+
     m_svm_classifier.setProbabilityEstimates((m_svm_parameters.probability?true:false));
+
     m_svm_classifier.resetTrainingSet();
     m_svm_classifier.setInputTrainingSet(test_set);
 
@@ -428,31 +416,27 @@ void PCL_upd_DEMO::classification()
 std::vector< std::vector<double> > classification_result;
 
 m_svm_classifier.getClassificationResult(classification_result);
-std::cout << "\t  Classification result size = \t  " << classification_result.size() << " \n";
-std::cout << "\t  Classification result = \t  " << classification_result.at(0).at(0) << " \n";
+//std::cout << "\t  Classification result size = \t  " << classification_result.size() << " \n";
+//std::cout << "\t  Classification result = \t  " << classification_result.at(0).at(0) << " \n";
 
-if (classification_result.at(0).at(0) == 1 ) QMessageBox::information(this, "info !", " it's ground!!");
+if (classification_result.at(0).at(0) == 1 )
+    QMessageBox::information(this, "info !", " it's ground!! \n result size " +  QString::number(classification_result.size()) );
 
-if (classification_result.at(0).at(0) == -1 ) QMessageBox::information(this, "info !", " it's NOT ground!!");
+if (classification_result.at(0).at(0) == -1 )
+    QMessageBox::information(this, "info !", " it's NOT ground!! \n result size " +  QString::number(classification_result.size()) );
 
 }
 
+
+
 void PCL_upd_DEMO::classificationTest()
 {
-
+// TODO: check if the model is valid
 m_svm_classifier.setClassifierModel(m_svm_model);
 
 m_svm_classifier.setProbabilityEstimates((m_svm_parameters.probability?true:false));
 m_svm_classifier.resetTrainingSet();
-//m_svm_classifier.setInputTrainingSet(m_test_set);
 m_svm_classifier.setInputTrainingSet(m_training_set);
-
-if ( m_svm_classifier.classification( ) )
-  std::cout << "\t Classification DONE ! \n";
-else {
-  std::cout << "\t Classification ERROR --- Exit now ! \n\n";
-  return ;
-}
 
 // set some vars for the test report
 int number_of_positive_samples = 0;
@@ -497,6 +481,18 @@ std::cout << "\t NOTE: using probability parameter will always results in \n"
           << "\t       high number of unclassified samples \n\n";
 
 
+int test_correct = m_svm_classifier.getClassificationCorrectPredictionsNumber();
+
+double percentage = double(test_correct)/m_training_set.size() *100.0 ;
+
+std::cout << " percentage " << percentage << std::endl;
+
+QMessageBox::information(this, "info !", " Classification test accuracy " +
+                                         QString::number(percentage) +
+                                         "%  (" + QString::number(test_correct ) +
+                                         "/" + QString::number(m_training_set.size() ) + ")" );
+
+return;
 }
 
 void PCL_upd_DEMO::clearLabelling()

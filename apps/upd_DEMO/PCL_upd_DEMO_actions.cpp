@@ -14,6 +14,10 @@ void PCL_upd_DEMO::openFileList ( )
     //QFileDialog::getOpenFileName (parent, dialog title, default folder, allowed formats)
       m_path_to_pcd_list = QFileDialog::getOpenFileName (	this, tr("Open File list"),   // dialog to open files
                     QDir::currentPath(),	"Text files (*.txt);; All Files(*.*)" , 0);
+      if (m_path_to_pcd_list.isEmpty()){
+          QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+          return;
+      }
       m_folder_to_list = m_path_to_pcd_list.section("/",0,-2);    //--> extract the path
       //QMessageBox::information(this, "Properly opened folder : ", m_folder_to_list);
       //QMessageBox::information(this, "Properly opened file : ", m_path_to_pcd_list);
@@ -51,17 +55,21 @@ void PCL_upd_DEMO::openFile()
 {
 
     QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
-    QString cloud_path = QFileDialog::getOpenFileName (this, tr("Open cloud"), QDir::currentPath(),  // dialog to open files
+    QString load_path = QFileDialog::getOpenFileName (this, tr("Open cloud"), QDir::currentPath(),  // dialog to open files
                         "ASCII Point Cloud File (*.pcd);; Binary Cloud File (*.bin);; All Files(*.*)" , 0);
-
-    if (pcl::io::loadPCDFile (cloud_path.toUtf8().constData(), *m_cloud) == -1){ 
+    if (load_path.isEmpty()){
         QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
-		QMessageBox::warning(this, "Warning !", "File not found ! <br>" + cloud_path);
+        return;
+    }
+
+    if (pcl::io::loadPCDFile (load_path.toUtf8().constData(), *m_cloud) == -1){
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        QMessageBox::warning(this, "Warning !", "File not found ! <br>" + load_path);
 	}
         
    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
-   ui->label_fileStatus_cloud->setText(QString::fromStdString(cloud_path.toUtf8().constData()));  // set the status bar to the current pcd
+   ui->label_fileStatus_cloud->setText(QString::fromStdString(load_path.toUtf8().constData()));  // set the status bar to the current pcd
    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");
    viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
         ui->qvtkWidget->update ();
@@ -89,6 +97,10 @@ void PCL_upd_DEMO::openImageList()
         //QFileDialog::getOpenFileName (parent, dialog title, default folder, allowed formats)
       m_path_to_image_list = QFileDialog::getOpenFileName (	this, tr("Open File list"), QDir::currentPath(),  // dialog to open files
                         "Text file (*.txt);; All Files(*.*)" , 0);
+      if (m_path_to_image_list.isEmpty()){
+          QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+          return;
+      }
       m_folder_to_list = m_path_to_image_list.section("/",0,-2);    //--> extract the path
       //QMessageBox::information(this, "Properly opened folder : ", m_folder_to_list);
       //QMessageBox::information(this, "Properly opened file : ", m_path_to_pcd_list);
@@ -123,6 +135,9 @@ void PCL_upd_DEMO::openImageList()
 void PCL_upd_DEMO::openPCDFolder ()
 {
         QDir m_dir = QFileDialog::getExistingDirectory(this, tr("Open folder"), QDir::currentPath(), 0);
+        // specify what happens when we press "cancel" on the window
+        // now it will get the dot folder   m_dir = ./
+
         QStringList nameFilter;
         nameFilter << "*.pcd" << "*.bin";
         QStringList file_pcd_list;
@@ -132,24 +147,43 @@ void PCL_upd_DEMO::openPCDFolder ()
         for (unsigned int i=0; i < file_pcd_list.size(); i++)
         {
             QString file_with_absolute_path = m_dir.path();
-            std::cout << file_pcd_list.at(i).toStdString() << std::endl;
+            //std::cout << file_pcd_list.at(i).toStdString() << std::endl;
 
             file_with_absolute_path.append("/");
             file_with_absolute_path.append(file_pcd_list.at(i));
 
-            std::cout << file_with_absolute_path.toStdString() << std::endl;
+            //std::cout << file_with_absolute_path.toStdString() << std::endl;
             m_file_pcd_list.push_back(file_with_absolute_path);
 
         }
+        ui->listWidget_pcdNames->clear();
         ui->listWidget_pcdNames->addItems(m_file_pcd_list);
 }
 
 void PCL_upd_DEMO::openImagesFolder ()
 {
         QDir m_dir = QFileDialog::getExistingDirectory(this, tr("Open folder"), QDir::currentPath(), 0);
+        // specify what happens when we press "cancel" on the window
+        // now it will get the dot folder   m_dir = ./
+
         QStringList nameFilter;
         nameFilter << "*.jpg" << "*.pgn" << "*.pgm" << "*.bmp";
-        m_file_image_list = m_dir.entryList( nameFilter, QDir::Files | QDir::NoDotAndDotDot );
+        QStringList file_images_list;
+        file_images_list = m_dir.entryList( nameFilter, QDir::Files | QDir::NoDotAndDotDot );
+
+        m_file_image_list.clear();
+        for (unsigned int i=0; i < file_images_list.size(); i++)
+        {
+            QString file_with_absolute_path = m_dir.path();
+            //std::cout << file_images_list.at(i).toStdString() << std::endl;
+
+            file_with_absolute_path.append("/");
+            file_with_absolute_path.append(file_images_list.at(i));
+
+            //std::cout << file_with_absolute_path.toStdString() << std::endl;
+            m_file_image_list.push_back(file_with_absolute_path);
+
+        }
         ui->listWidget_imageNames->clear();
         ui->listWidget_imageNames->addItems(m_file_image_list);
 }
@@ -160,13 +194,25 @@ PCL_upd_DEMO::saveFile()
 {
 
     QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+
+    if (m_cloud->empty()){
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        QMessageBox::warning(this, "Warning !", "Cloud empty cannot be saved  ! " );
+        return;
+    }
+
     QString cloud_path = QFileDialog::getSaveFileName (this, tr("Save ASCII cloud"), QDir::currentPath(),  // dialog to open files
                         "ASCII Point Cloud File (*.pcd);; Binary Cloud File (*.bin);; All Files(*.*)" , 0);
+    if (cloud_path.isEmpty()){
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    }
 
+    m_cloud->resize(m_cloud->size());
     if (pcl::io::savePCDFileASCII (cloud_path.toUtf8().constData(), *m_cloud) == -1) QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + cloud_path);
                 //cout << "Loaded " << cloud->size () << " data points from " << m_file_pdc_list.at(0) << endl;
 
-   QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
 }
 
@@ -175,13 +221,23 @@ PCL_upd_DEMO::saveUPDFile()
 {
 
     QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
-    /*if (UPD_cloud->isEmpty())
-    {QMessageBox::warning(this, "Warning !", "UPD cloud empty not saved  ! " );
-    }*/
+
+    if (UPD_cloud->empty()) {
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        QMessageBox::warning(this, "Warning !", "UPD cloud empty cannot be saved  ! " );
+        return;
+    }
+
     QString cloud_path = QFileDialog::getSaveFileName (this, tr("Save ASCII cloud"), QDir::currentPath(),  // dialog to open files
                         "ASCII Point Cloud File (*.pcd);; Binary Cloud File (*.bin);; All Files(*.*)" , 0);
+    if (cloud_path.isEmpty()){
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    }
 
-    if (pcl::io::savePCDFileASCII (cloud_path.toUtf8().constData(), *UPD_cloud) == -1) QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + cloud_path);
+    m_cloud->resize(m_cloud->size());
+    if (pcl::io::savePCDFileASCII (cloud_path.toUtf8().constData(), *UPD_cloud) == -1)
+        QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + cloud_path);
                 //cout << "Loaded " << cloud->size () << " data points from " << m_file_pcd_list.at(0) << endl;
 
    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
@@ -191,20 +247,132 @@ PCL_upd_DEMO::saveUPDFile()
 void
 PCL_upd_DEMO::saveLabeledFile()
 {
+    QMessageBox::warning(this, "Warning !", "Not used ! " );
+    return;
 
     QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
     /*if (UPD_cloud->isEmpty())
     {QMessageBox::warning(this, "Warning !", "UPD cloud empty not saved  ! " );
     }*/
-    QString cloud_path = QFileDialog::getSaveFileName (this, tr("Save ASCII cloud"), QDir::currentPath(),  // dialog to open files
-                        "ASCII Point Cloud File (*.pcd);; Binary Cloud File (*.bin);; All Files(*.*)" , 0);
+//    QString cloud_path = QFileDialog::getSaveFileName (this, tr("Save ASCII cloud"), QDir::currentPath(),  // dialog to open files
+//                        "ASCII Point Cloud File (*.pcd);; Binary Cloud File (*.bin);; All Files(*.*)" , 0);
 
-    if (pcl::io::savePCDFileASCII (cloud_path.toUtf8().constData(), *m_labeled_cloud) == -1) QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + cloud_path);
+//    if (pcl::io::savePCDFileASCII (cloud_path.toUtf8().constData(), *m_labeled_cloud) == -1) QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + cloud_path);
                 //cout << "Loaded " << cloud->size () << " data points from " << m_file_pcd_list.at(0) << endl;
 
    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
 }
+
+
+void
+PCL_upd_DEMO::saveClassifierModel()
+{
+
+    if (!m_svm_model.isValid()) {
+        QMessageBox::warning(this, "Warning !", "No valid SVM model" );
+        return;
+    }
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+
+
+    QString save_path = QFileDialog::getSaveFileName (this, tr("Save SVM classifier model"), QDir::currentPath(),  // dialog to open files
+                        " Data File (*.dat);; All Files(*.*)" , 0);
+    if (save_path.isEmpty()){
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    }
+
+    if (!m_svm_trainer.saveClassifierModel ( save_path.toUtf8().constData() ) )
+        QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + save_path);
+
+    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+
+}
+
+void
+PCL_upd_DEMO::saveTrainingDataset()
+{
+
+    if (m_training_set.size()<1 ) {
+        QMessageBox::warning(this, "Warning !", "NO training data to be saved ! " );
+        return;
+    }
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+
+
+    QString save_path = QFileDialog::getSaveFileName (this, tr("Save SVM training set"), QDir::currentPath(),  // dialog to open files
+                        "Data File (*.dat);; All Files(*)" , 0);
+    if (save_path.isEmpty()){
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    }
+
+    m_svm_trainer.resetTrainingSet();
+    m_svm_trainer.setInputTrainingSet(m_training_set);
+    if (!m_svm_trainer.saveTrainingSet ( save_path.toUtf8().constData() ) )
+        QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + save_path);
+
+    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+
+}
+
+
+void
+PCL_upd_DEMO::loadClassifierModel()
+{
+
+QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+QString load_path = QFileDialog::getOpenFileName (this, tr("Open SVM model"), QDir::currentPath(),  // dialog to open files
+                    "Model Data file (*.dat);; All Files(*.*)" , 0);
+if (load_path.isEmpty()){
+    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+    return;
+}
+
+if (!m_svm_classifier.loadClassifierModel (load_path.toUtf8().constData()) ){
+    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+    QMessageBox::warning(this, "Warning !", "File not found ! <br>" + load_path);
+}
+
+QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+
+}
+
+void
+PCL_upd_DEMO::loadTrainingDataset()
+{
+
+QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+QString load_path = QFileDialog::getOpenFileName (this, tr("Open training dataset"), QDir::currentPath(),  // dialog to open files
+                                                  "Training Data file (*.dat);; All Files(*.*)" , 0);
+if (load_path.isEmpty()){
+    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+    return;
+}
+
+if (!m_svm_trainer.loadProblem (load_path.toUtf8().constData()) ){
+    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+    QMessageBox::warning(this, "Warning !", "File not found ! <br>" + load_path);
+}
+m_training_set = m_svm_trainer.getInputTrainingSet();
+
+QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+
+ui->label_fileStatus_cloud->setText(QString::fromStdString(load_path.toUtf8().constData()));  // set the status bar to the current pcd
+viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");
+viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
+    ui->qvtkWidget->update ();
+
+
+}
+
+
+
+
+
 
 void PCL_upd_DEMO::removeFilters()
 {

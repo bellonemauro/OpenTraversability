@@ -88,7 +88,13 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->actionLabelled_Cloud, SIGNAL(triggered()), this, SLOT(saveLabeledFile()));
   connect (ui->actionRemove_Filters, SIGNAL(triggered()), this, SLOT(removeFilters()) );
   connect (ui->actionGenerate_sample_cloud, SIGNAL(triggered()), this, SLOT(GenerateSampleCloud()));
+  connect (ui->actionSave_classifier_model, SIGNAL(triggered()), this, SLOT (saveClassifierModel()));
+  connect (ui->actionSave_training_set, SIGNAL(triggered()), this, SLOT (saveTrainingDataset()));
+  connect (ui->actionLoad_classifier_model, SIGNAL(triggered()), this, SLOT (loadClassifierModel()));
+  connect (ui->actionLoad_training_data, SIGNAL(triggered()), this, SLOT (loadTrainingDataset()));
   connect (ui->actionAbout, SIGNAL(triggered()), this, SLOT (about()));
+
+
 
 
   //buttons
@@ -103,8 +109,8 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->pushButton_notGround, SIGNAL(clicked()), this, SLOT (labelNotGround()));
   connect (ui->pushButton_clearLabelling, SIGNAL(clicked()), this, SLOT (clearLabelling()));
   connect (ui->pushButton_train, SIGNAL(clicked()), this, SLOT (trainClassifier()));
-  connect (ui->pushButton_saveTrainingSet, SIGNAL(clicked()), this, SLOT (saveTrainingDataset()));
-  connect (ui->pushButton_classModel, SIGNAL(clicked()), this, SLOT (saveClassifierModel()));
+  //connect (ui->pushButton_saveTrainingSet, SIGNAL(clicked()), this, SLOT (saveTrainingDataset()));
+  //connect (ui->pushButton_classModel, SIGNAL(clicked()), this, SLOT (saveClassifierModel()));
   connect (ui->pushButton_classify, SIGNAL(clicked()), this, SLOT (classification()));
   connect (ui->pushButton_smvTest, SIGNAL(clicked()), this, SLOT (classificationTest()));
 

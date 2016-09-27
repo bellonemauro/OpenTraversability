@@ -293,6 +293,12 @@ private slots:
   saveTrainingDataset();
 
   void
+  loadClassifierModel();
+
+  void
+  loadTrainingDataset();
+
+  void
   classificationTest();
 
   void
@@ -372,6 +378,12 @@ protected:
   void copyPatchToClassifiable(const pcl::PointCloud<pcl::PointSurfel> &_cloud_in,
                                pcl::PointCloud<PointClassifiable> &_cloud_out,
                                float _label);
+
+  /**  Call this to be sure that the parameters are properly passed from the UI to the SVM params
+    *
+    */
+  void getGUIclassifierParams();
+
 
 private:
 
