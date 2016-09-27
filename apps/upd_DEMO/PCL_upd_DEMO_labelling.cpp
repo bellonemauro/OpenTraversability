@@ -481,16 +481,16 @@ std::cout << "\t NOTE: using probability parameter will always results in \n"
           << "\t       high number of unclassified samples \n\n";
 
 
-int test_correct = m_svm_classifier.getClassificationCorrectPredictionsNumber();
+pcl::SVMtestReport svm_test_report = m_svm_classifier.getClassificationTestReport();
 
-double percentage = double(test_correct)/m_training_set.size() *100.0 ;
+double accuracy = svm_test_report.accuracy;//double(test_correct)/m_training_set.size() *100.0 ;
 
-std::cout << " percentage " << percentage << std::endl;
+std::cout << " percentage " << accuracy << std::endl;
 
 QMessageBox::information(this, "info !", " Classification test accuracy " +
-                                         QString::number(percentage) +
-                                         "%  (" + QString::number(test_correct ) +
-                                         "/" + QString::number(m_training_set.size() ) + ")" );
+                                         QString::number(svm_test_report.accuracy) +
+                                         "%  (" + QString::number(svm_test_report.correctPredictionsIdx ) +
+                                         "/" + QString::number(svm_test_report.totalSamples ) + ")" );
 
 return;
 }
