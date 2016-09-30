@@ -88,10 +88,18 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->actionLabelled_Cloud, SIGNAL(triggered()), this, SLOT(saveLabeledFile()));
   connect (ui->actionRemove_Filters, SIGNAL(triggered()), this, SLOT(removeFilters()) );
   connect (ui->actionGenerate_sample_cloud, SIGNAL(triggered()), this, SLOT(GenerateSampleCloud()));
+
   connect (ui->actionSave_classifier_model, SIGNAL(triggered()), this, SLOT (saveClassifierModel()));
   connect (ui->actionSave_training_set, SIGNAL(triggered()), this, SLOT (saveTrainingDataset()));
+  connect (ui->actionSave_parameters, SIGNAL(triggered()), this, SLOT (saveParameters()));
+  connect (ui->actionSave_training_problem, SIGNAL(triggered()), this, SLOT (saveTrainingProblem()));
+
   connect (ui->actionLoad_classifier_model, SIGNAL(triggered()), this, SLOT (loadClassifierModel()));
   connect (ui->actionLoad_training_data, SIGNAL(triggered()), this, SLOT (loadTrainingDataset()));
+  connect (ui->actionLoad_parameters, SIGNAL(triggered()), this, SLOT (loadSVMparameters()));
+  connect (ui->actionLoad_training_problem, SIGNAL(triggered()), this, SLOT (loadTrainingProblem()));
+  connect (ui->actionLoad_classification_problem, SIGNAL(triggered()), this, SLOT (loadClassificationProblem()));
+
   connect (ui->actionAbout, SIGNAL(triggered()), this, SLOT (about()));
 
 

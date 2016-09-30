@@ -291,31 +291,48 @@ void PCL_upd_DEMO::addSVMdataToTrainingSet(float _f1, float _f2, float _f3, floa
 void
 PCL_upd_DEMO::getGUIclassifierParams()
 {
-    m_svm_parameters.kernel_type = RBF;
-    m_svm_parameters.shrinking = ui->checkBox_Shrinking->isChecked();//
+    // set SVM type
+    int svm_type = 0;// C_SVC, NU_SVC, ONE_CLASS, EPSILON_SVR, NU_SVR  // svm_type
+    svm_type = ui->comboBox_SVMtype->currentIndex();
+    m_svm_parameters.svm_type = svm_type;
 
+    // set SVM kernel
+    int kernel_type = 0;// LINEAR, POLY, RBF, SIGMOID, PRECOMPUTED  // kernel_type
+    kernel_type = ui->comboBox_svmKernelType->currentIndex();
+    m_svm_parameters.kernel_type = kernel_type;
+
+    // set SVM gamma -- this is used for poly/rbf/sigmoid kernels
     double gamma = 0;
     bool isNumeric;
     gamma = ui->lineEdit_SVMgamma->text().toDouble(&isNumeric);
     if(!isNumeric)
     {
         QMessageBox::warning(this, "Warning !", "GAMMA is not a valid number !");
-        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
         return;
     };
     m_svm_parameters.gamma = gamma;
 
-    double c = 0;
-    c = ui->lineEdit_SVMc->text().toDouble(&isNumeric);
+    // set SVM C param
+    double C = 0;
+    C = ui->lineEdit_SVMc->text().toDouble(&isNumeric);
     if(!isNumeric)
     {
         QMessageBox::warning(this, "Warning !", "C is not a valid number !");
-        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
         return;
     };
-    m_svm_parameters.C = c;
-    m_svm_parameters.probability = ui->checkBox_probability->isChecked();
+    m_svm_parameters.C = C;
 
+    double degree = 0;
+    degree = ui->lineEdit_SVMdegree->text().toDouble(&isNumeric);
+    if(!isNumeric)
+    {
+        QMessageBox::warning(this, "Warning !", "SVM degree is not a valid number !");
+        return;
+    };
+    m_svm_parameters.degree = degree;
+
+    m_svm_parameters.probability = ui->checkBox_probability->isChecked();
+    m_svm_parameters.shrinking = ui->checkBox_Shrinking->isChecked();
 }
 
 void
@@ -354,8 +371,12 @@ PCL_upd_DEMO::trainClassifier()
     std::cout << "\t\t  Number of classes   \t " << m_svm_model.nr_class << " \n";
     std::cout << "\t\t  sv_coef   \t  \t " <<  *(*m_svm_model.sv_coef) << " \n";
     std::cout << "\t\t  Rho   \t  \t " <<  *m_svm_model.rho << " \n";
-    std::cout << "\t\t  label   \t  \t " <<  *m_svm_model.label << " \n";
-    std::cout << "\t\t  nSV \t   \t  \t " <<  *m_svm_model.nSV << " \n\n";
+
+    if ( m_svm_model.label == NULL ) std::cout << "\t\t  label   \t  \t  NULL \n";
+    else std::cout << "\t\t  label   \t  \t " <<  *m_svm_model.label << " \n";
+
+    if (m_svm_model.nSV == NULL ) std::cout << "\t\t  nSV \t   \t  \t  NULL \n";
+    else std::cout << "\t\t  nSV \t   \t  \t " <<  *m_svm_model.nSV << " \n\n";
 
 }
 
@@ -494,6 +515,52 @@ QMessageBox::information(this, "info !", " Classification test accuracy " +
 
 return;
 }
+
+void
+PCL_upd_DEMO::addSVMdataToTable(std::vector<pcl::SVMData> _data)
+{
+    if (_data.size() < 1 )
+    {
+        std::cout << "<< PCL_upd_DEMO::addSVMdataToTable : error >> too small dataset " << std::endl;
+        return;
+    }
+
+ui->treeWidget_classification->clear();
+
+for (int i = 0; i< _data.size(); i++)
+{
+    QTreeWidgetItem * item = new QTreeWidgetItem();   // and update the widget for the visualization
+///TODO check for the right format of the input file, otherwise it will crash !
+    if (_data.at(i).label == -1 )  item->setText(0,"NOT Ground");
+    else if (_data.at(i).label == 1) item->setText(0,"Ground");
+    else std::cout << " Label not reconized at line " << i << std::endl;
+
+    stringstream ss;
+    ss << " NO coordinate from file ";
+    item->setText(1,QString::fromStdString(ss.str()));
+
+    ss.str("");
+    ss << " angle = " << _data.at(i).SV.at(0).value << " deg "
+                      << _data.at(i).SV.at(1).value << " deg ";
+    item->setText(3,QString::fromStdString(ss.str()) );
+    ss.str("");
+    ss << " upd = " << _data.at(i).SV.at(2).value;
+    item->setText(2,QString::fromStdString(ss.str()) );
+
+
+    ui->treeWidget_classification->resizeColumnToContents(0);
+    ui->treeWidget_classification->resizeColumnToContents(1);
+    ui->treeWidget_classification->resizeColumnToContents(2);
+    ui->treeWidget_classification->resizeColumnToContents(3);
+
+    ui->treeWidget_classification->insertTopLevelItem(0,item);
+}
+
+
+}
+
+
+
 
 void PCL_upd_DEMO::clearLabelling()
 {

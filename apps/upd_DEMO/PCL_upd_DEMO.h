@@ -293,10 +293,27 @@ private slots:
   saveTrainingDataset();
 
   void
+  saveParameters();
+
+  void
+  saveTrainingProblem();
+
+
+
+  void
   loadClassifierModel();
 
   void
   loadTrainingDataset();
+
+  void
+  loadTrainingProblem();
+
+  void
+  loadSVMparameters();
+
+  void
+  loadClassificationProblem();
 
   void
   classificationTest();
@@ -320,6 +337,10 @@ protected:
   
   void
   addSVMdataToTrainingSet(float _f1, float _f2, float _f3, float _label );
+
+  void
+  addSVMdataToTable(std::vector<pcl::SVMData> _data);
+
 	
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
   PointCloudT::Ptr m_cloud;           			//--> allocate a cloud for visualization and data processing

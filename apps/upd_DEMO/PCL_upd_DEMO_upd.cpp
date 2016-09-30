@@ -105,7 +105,7 @@
     }
     else
     {
-    double search_radius = 0.5;
+    double search_radius = 0.5; // just a default value
     bool isNumeric;
     search_radius = ui->lineEdit_searchRadius->text().toDouble(&isNumeric);
     if(!isNumeric)
@@ -142,7 +142,7 @@ void PCL_upd_DEMO::switchVisualization()
 	{
 		m_upd->setColorMapType(false);
 		m_upd->getAsColorMap(   m_cloud_color_UPD,
-								ui->lcdNumber_unevenness->value()/ui->horizontalSlider_unevennessIndex->maximum(),
+                                (10000*ui->lcdNumber_unevenness->value())/ui->horizontalSlider_unevennessIndex->maximum(),
 								pcl::deg2rad(ui->lcdNumber_thresholdAngle->value()));
 		viewer->removePointCloud();
         pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb_color(m_cloud_color_UPD);

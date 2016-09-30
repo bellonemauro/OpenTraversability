@@ -286,6 +286,8 @@ PCL_upd_DEMO::saveClassifierModel()
 
     if (!m_svm_trainer.saveClassifierModel ( save_path.toUtf8().constData() ) )
         QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + save_path);
+    else
+        QMessageBox::information(this, "info !", " PCL-SVM demo - SVM classifier model file saved at " +  save_path );
 
     QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
@@ -312,12 +314,92 @@ PCL_upd_DEMO::saveTrainingDataset()
 
     m_svm_trainer.resetTrainingSet();
     m_svm_trainer.setInputTrainingSet(m_training_set);
-    if (!m_svm_trainer.saveTrainingSet ( save_path.toUtf8().constData() ) )
+    if (!m_svm_trainer.saveNormTrainingSet ( save_path.toUtf8().constData() ) )
         QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + save_path);
+    else
+        QMessageBox::information(this, "info !", " PCL-SVM demo - SVM training set file saved at " +  save_path );
 
     QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
 }
+
+void
+PCL_upd_DEMO::saveParameters()
+{
+
+    QString save_path = QFileDialog::getSaveFileName (this, tr("Save SVM training set"), QDir::currentPath(),  // dialog to open files
+                        "Data File (*.dat);; All Files(*)" , 0);
+    if (save_path.isEmpty()){
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    }
+
+    // to add time
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+
+    string _Log_file_name;
+    _Log_file_name = save_path.toStdString();
+
+
+    { //save file
+        ofstream _LogFile(_Log_file_name.c_str(), ios_base::app | ios_base::out);
+        if (_LogFile.is_open())
+        {
+            _LogFile << "%% +---------------------------------------------------------------------------+" << endl;
+            _LogFile << "%% |                   Chalmers University of technology                       |" << endl;
+            _LogFile << "%% |                              Mauro Bellone                                |" << endl;
+            _LogFile << "%% |                                                                           |" << endl;
+            _LogFile << "%% |                      http://www.maurobellone.com/                         |" << endl;
+            _LogFile << "%% +---------------------------------------------------------------------------+" << endl;
+            _LogFile << "" << endl;
+            _LogFile << "%% Parameter File Header V. 0.1 " << endl;
+            _LogFile << "%% file created on dd/mm/yyyy " << 1 + ltm->tm_mon << "/" << ltm->tm_mday << "/" << 1900 + ltm->tm_year << " at " << ltm->tm_hour << ":" << ltm->tm_min << ":" << ltm->tm_sec << endl;
+            _LogFile << "%% SVM classifier parameters report " << endl;
+            _LogFile << "%% +---------------------------------------------------------------------------+" << endl;
+            _LogFile << "%% Configuration Parameters: " << endl;
+            _LogFile << "%% Gamma       " << ui->lineEdit_SVMgamma->text().toStdString() << "; "<< endl;
+            _LogFile << "%% C           " << ui->lineEdit_SVMc->text().toStdString() << "; " << endl;
+            _LogFile << "%% Degree      " << ui->lineEdit_SVMdegree->text().toStdString() << "; " << endl;
+            _LogFile << "%% SVM type    " << ui->comboBox_SVMtype->currentText().toStdString() << "; " << endl;
+            _LogFile << "%% Kernel type " << ui->comboBox_svmKernelType->currentText().toStdString() << "; " << endl;
+            _LogFile << "%% Shrinking   " << ui->checkBox_Shrinking->isChecked() << "; " << endl;
+            _LogFile << "%% Probability " << ui->checkBox_probability->isChecked() << "; " << endl;
+            _LogFile << "%% +---------------------------------------------------------------------------+ " << endl;
+
+            //at the first call one sample is lost !!
+            _LogFile.close();
+            QMessageBox::information(this, "info !", " PCL-SVM demo - SVM parameter file saved at " +  QString::fromStdString(_Log_file_name) );
+
+        }
+    }
+
+
+
+}
+
+void
+PCL_upd_DEMO::saveTrainingProblem()
+{
+    // check the problem before saving !
+    QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+
+
+    QString save_path = QFileDialog::getSaveFileName (this, tr("Save SVM training problem"), QDir::currentPath(),  // dialog to open files
+                        "Data File (*.dat);; All Files(*)" , 0);
+    if (save_path.isEmpty()){
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    }
+/// TODO protected function ! see what's going on here !
+//    if (!m_svm_trainer.saveProblem ( save_path.toUtf8().constData(), true ) ) ///TODO: true if labelled/ false otherwise
+        QMessageBox::warning(this, "Warning !", "This is still experimental \n File not saved ! <br>" + save_path);
+//        else
+//            QMessageBox::information(this, "info !", " PCL-SVM demo - SVM training problem file saved at " +  save_path );
+
+    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+}
+
 
 
 void
@@ -336,7 +418,8 @@ if (!m_svm_classifier.loadClassifierModel (load_path.toUtf8().constData()) ){
     QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
     QMessageBox::warning(this, "Warning !", "File not found ! <br>" + load_path);
 }
-
+// set the model from the classifier to our internal class member
+m_svm_model = m_svm_classifier.getClassifierModel();
 QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
 }
@@ -354,23 +437,42 @@ if (load_path.isEmpty()){
 }
 
 if (!m_svm_trainer.loadProblem (load_path.toUtf8().constData()) ){
-    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+//if (!m_svm_classifier.loadClassProblem(load_path.toUtf8().constData()) ){
+            QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
     QMessageBox::warning(this, "Warning !", "File not found ! <br>" + load_path);
 }
+
+///TODO IMPORTANT: if the training set has data, they may be replaced
+m_svm_trainer.adaptProbToInput();
 m_training_set = m_svm_trainer.getInputTrainingSet();
+addSVMdataToTable(m_training_set);
+
+//m_training_set = m_svm_classifier.getInputTrainingSet();
 
 QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
-ui->label_fileStatus_cloud->setText(QString::fromStdString(load_path.toUtf8().constData()));  // set the status bar to the current pcd
-viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");
-viewer->updatePointCloud (m_cloud, m_rgb_color, "cloud");
-    ui->qvtkWidget->update ();
-
+std::cout << " dataset loaded " << m_training_set.size() << std::endl;
 
 }
 
 
+void
+PCL_upd_DEMO::loadTrainingProblem()
+{
 
+}
+
+void
+PCL_upd_DEMO::loadSVMparameters()
+{
+
+}
+
+void
+PCL_upd_DEMO::loadClassificationProblem()
+{
+
+}
 
 
 

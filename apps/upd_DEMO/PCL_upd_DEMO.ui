@@ -165,25 +165,25 @@
              </size>
             </property>
             <property name="currentIndex">
-             <number>4</number>
+             <number>3</number>
             </property>
             <widget class="QWidget" name="PointClouds">
              <attribute name="title">
-              <string>Point clouds</string>
+              <string>Dataset</string>
              </attribute>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <item>
-               <widget class="QListWidget" name="listWidget_pcdNames"/>
+             <layout class="QGridLayout" name="gridLayout_8">
+              <item row="1" column="1">
+               <widget class="QListWidget" name="listWidget_imageNames">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
               </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="CameraImages">
-             <attribute name="title">
-              <string>Camera</string>
-             </attribute>
-             <layout class="QVBoxLayout" name="verticalLayout_5">
-              <item>
-               <widget class="QListWidget" name="listWidget_imageNames"/>
+              <item row="1" column="0">
+               <widget class="QListWidget" name="listWidget_pcdNames"/>
               </item>
              </layout>
             </widget>
@@ -559,6 +559,9 @@
                    <property name="text">
                     <string>z  [m]</string>
                    </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="2">
@@ -580,6 +583,9 @@
                    </property>
                    <property name="text">
                     <string>y  [m]</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
@@ -624,6 +630,9 @@
                    <property name="text">
                     <string>x  [m]</string>
                    </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
                   </widget>
                  </item>
                  <item row="3" column="2">
@@ -638,6 +647,9 @@
                    </property>
                    <property name="text">
                     <string>yaw  [deg]</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
@@ -661,6 +673,9 @@
                    <property name="text">
                     <string>pitch [deg]</string>
                    </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="4">
@@ -682,6 +697,9 @@
                    </property>
                    <property name="text">
                     <string>roll  [deg]</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
@@ -1079,7 +1097,7 @@
               <string>Manual Labelling</string>
              </attribute>
              <layout class="QGridLayout" name="gridLayout_3">
-              <item row="3" column="0" colspan="2">
+              <item row="4" column="0" colspan="2">
                <widget class="QPushButton" name="pushButton_notGround">
                 <property name="enabled">
                  <bool>false</bool>
@@ -1089,7 +1107,7 @@
                 </property>
                </widget>
               </item>
-              <item row="7" column="0">
+              <item row="8" column="0">
                <widget class="QLabel" name="label">
                 <property name="text">
                  <string>Patch size (m)</string>
@@ -1116,7 +1134,7 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="0" colspan="2">
+              <item row="3" column="0" colspan="2">
                <widget class="QPushButton" name="pushButton_ground">
                 <property name="enabled">
                  <bool>false</bool>
@@ -1126,14 +1144,21 @@
                 </property>
                </widget>
               </item>
-              <item row="7" column="4">
+              <item row="8" column="4">
                <widget class="QPushButton" name="pushButton_classify">
                 <property name="text">
                  <string>What's this?</string>
                 </property>
                </widget>
               </item>
-              <item row="5" column="0" colspan="2">
+              <item row="0" column="0" colspan="2">
+               <widget class="QPushButton" name="pushButton_start_stopLabelling">
+                <property name="text">
+                 <string>Start/Stop Labelling</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0" colspan="2">
                <widget class="QPushButton" name="pushButton_clearLabelling">
                 <property name="enabled">
                  <bool>true</bool>
@@ -1143,7 +1168,7 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="3" rowspan="8">
+              <item row="0" column="3" rowspan="9">
                <widget class="QTreeWidget" name="treeWidget_classification">
                 <column>
                  <property name="text">
@@ -1167,14 +1192,14 @@
                 </column>
                </widget>
               </item>
-              <item row="0" column="0" colspan="2">
-               <widget class="QPushButton" name="pushButton_start_stopLabelling">
+              <item row="8" column="5">
+               <widget class="QPushButton" name="pushButton_smvTest">
                 <property name="text">
-                 <string>Start/Stop Labelling</string>
+                 <string>SVM test</string>
                 </property>
                </widget>
               </item>
-              <item row="7" column="1">
+              <item row="8" column="1">
                <widget class="QLineEdit" name="lineEdit_patchSize">
                 <property name="maximumSize">
                  <size>
@@ -1187,24 +1212,13 @@
                 </property>
                </widget>
               </item>
-              <item row="7" column="5">
-               <widget class="QPushButton" name="pushButton_smvTest">
-                <property name="text">
-                 <string>SVM test</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="4" colspan="2">
-               <widget class="QPushButton" name="pushButton_train">
-                <property name="text">
-                 <string>train the classifier</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="4">
                <widget class="QLabel" name="label_3">
                 <property name="text">
                  <string>Gamma</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -1221,6 +1235,16 @@
                 </property>
                </widget>
               </item>
+              <item row="1" column="4">
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>C</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
               <item row="1" column="5">
                <widget class="QLineEdit" name="lineEdit_SVMc">
                 <property name="maximumSize">
@@ -1234,28 +1258,57 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="4">
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>C</string>
-                </property>
-               </widget>
-              </item>
               <item row="2" column="5">
-               <widget class="QCheckBox" name="checkBox_Shrinking">
+               <widget class="QLineEdit" name="lineEdit_SVMdegree">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
                 <property name="text">
-                 <string>Shrinking</string>
+                 <string>3</string>
                 </property>
                </widget>
               </item>
-              <item row="3" column="5">
+              <item row="2" column="4">
+               <widget class="QLabel" name="label_31">
+                <property name="text">
+                 <string>Degree</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="4" colspan="2">
+               <widget class="QPushButton" name="pushButton_train">
+                <property name="text">
+                 <string>train the classifier</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="5">
                <widget class="QCheckBox" name="checkBox_probability">
                 <property name="text">
                  <string>probability</string>
                 </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
-              <item row="3" column="4">
+              <item row="5" column="4">
+               <widget class="QCheckBox" name="checkBox_Shrinking">
+                <property name="text">
+                 <string>Shrinking</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="5">
                <widget class="QComboBox" name="comboBox_svmKernelType">
                 <property name="minimumSize">
                  <size>
@@ -1263,11 +1316,9 @@
                   <height>0</height>
                  </size>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>Kernel type</string>
-                 </property>
-                </item>
+                <property name="currentIndex">
+                 <number>2</number>
+                </property>
                 <item>
                  <property name="text">
                   <string>LINEAR</string>
@@ -1295,13 +1346,8 @@
                 </item>
                </widget>
               </item>
-              <item row="2" column="4">
+              <item row="3" column="5">
                <widget class="QComboBox" name="comboBox_SVMtype">
-                <item>
-                 <property name="text">
-                  <string>SVM type</string>
-                 </property>
-                </item>
                 <item>
                  <property name="text">
                   <string>C_SVC</string>
@@ -1327,6 +1373,20 @@
                   <string>NU_SVR</string>
                  </property>
                 </item>
+               </widget>
+              </item>
+              <item row="3" column="4">
+               <widget class="QLabel" name="label_32">
+                <property name="text">
+                 <string>SVM type</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="4">
+               <widget class="QLabel" name="label_33">
+                <property name="text">
+                 <string>Kernel type</string>
+                </property>
                </widget>
               </item>
              </layout>
@@ -1367,7 +1427,10 @@
      <addaction name="actionImages_Folder"/>
      <addaction name="separator"/>
      <addaction name="actionLoad_classifier_model"/>
+     <addaction name="actionLoad_parameters"/>
      <addaction name="actionLoad_training_data"/>
+     <addaction name="actionLoad_training_problem"/>
+     <addaction name="actionLoad_classification_problem"/>
     </widget>
     <widget class="QMenu" name="menuSave">
      <property name="title">
@@ -1379,6 +1442,8 @@
      <addaction name="separator"/>
      <addaction name="actionSave_training_set"/>
      <addaction name="actionSave_classifier_model"/>
+     <addaction name="actionSave_training_problem"/>
+     <addaction name="actionSave_parameters"/>
     </widget>
     <addaction name="menuOpen"/>
     <addaction name="menuSave"/>
@@ -1533,6 +1598,31 @@
   <action name="actionLoad_training_data">
    <property name="text">
     <string>Load training data</string>
+   </property>
+  </action>
+  <action name="actionSave_training_problem">
+   <property name="text">
+    <string>Save training problem</string>
+   </property>
+  </action>
+  <action name="actionSave_parameters">
+   <property name="text">
+    <string>Save parameters</string>
+   </property>
+  </action>
+  <action name="actionLoad_training_problem">
+   <property name="text">
+    <string>Load training problem</string>
+   </property>
+  </action>
+  <action name="actionLoad_classification_problem">
+   <property name="text">
+    <string>Load classification problem</string>
+   </property>
+  </action>
+  <action name="actionLoad_parameters">
+   <property name="text">
+    <string>Load parameters</string>
    </property>
   </action>
  </widget>
