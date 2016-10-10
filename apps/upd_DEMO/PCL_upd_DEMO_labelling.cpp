@@ -46,21 +46,120 @@ void PCL_upd_DEMO::startStopLabelling()
 
 }
 
+std::vector<float>
+PCL_upd_DEMO::createFeaturesReina()
+{
+
+    // prepare data for the classifier
+    std::vector<float> features;
+    // if we have no patch we cannot classify
+    if ( m_cloud_patch->size() < 1 || m_cloud_patch->size() < m_patch_labelling_index ) {
+        QMessageBox::information(this, "info !", " Patch size error !!");
+        return features; }
+
+    // covariance matrix
+    Eigen::Matrix3d covariance_matrix;
+    pcl::computeCovarianceMatrix(*m_cloud_patch, covariance_matrix);
+    std::cout << " covariance matrix is \n"<< covariance_matrix << std::endl;
+
+    // singular value decomposition
+    Eigen::JacobiSVD<Eigen::MatrixXd> SVD (covariance_matrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    Eigen::MatrixXd U = SVD.matrixU();
+    Eigen::MatrixXd V = SVD.matrixV();
+    Eigen::MatrixXd singular_values = SVD.singularValues().asDiagonal();
+
+    std::cout << "SVD decomposition : \n"
+              << " U = \n" << U << "\n"
+              << " V = \n" << V << "\n"
+              << " singular values: \n" << singular_values << std::endl;
+    std::cout << "verification : COV = U * sigma * V \n" << U * singular_values * V.transpose() << std::endl;
+
+    // check for the rank !
+    Eigen::FullPivLU<Eigen::Matrix3d> lu_decomp(covariance_matrix);
+    std::cout <<  " The rank of the covariance matrix is " << lu_decomp.rank() << std::endl;
+/*    if (lu_decomp.rank()>2) // we have a 3d surface
+    {
+
+    }
+    else if (lu_decomp.rank() == 2 ) // we are on a plane
+    {
+
+    }
+    else if (lu_decomp.rank() == 1 ) // we are on a line
+    {
+
+    }
+    else  // the matrix is zero
+    {
+        QMessageBox::information(this, "info !", " Patch size error - matrix 0 !!");
+        return features;
+    }*/
+
+
+    // slope
+    U.normalize();
+    std::cout << " U normalized = \n" << U << std::endl;
+    Eigen::Vector3d normalDirection (0.0, 0.0, 1.0);//.transpose()
+    Eigen::Vector3d product = U.transpose() * normalDirection;
+    std::cout << " product = " << product << "\n norm = " << product.norm() <<  std::endl;
+    double slope = std::acos( product.norm());
+    std::cout << " slope = " << slope << std::endl;
+
+    // smallest singular value
+    float small_singular_value = singular_values(2, 2);
+    std::cout << " the smallest singular value is " << small_singular_value << std::endl;
+
+    // mean along z
+    float mean = 0.0;
+    for (int i = 0; i< m_cloud_patch->size(); i++) {
+        mean +=m_cloud_patch->at(i).z;
+    }
+    mean = mean / m_cloud_patch->size();
+    std::cout << " the mean is : " << mean << std::endl;
+
+    // variance in the vertical direction
+    float variance = 0.0;
+    for (int i = 0; i< m_cloud_patch->size(); i++)  {
+        variance += (m_cloud_patch->at(i).z - mean)*(m_cloud_patch->at(i).z - mean);
+    }
+    std::cout << " the variance is : " << variance << std::endl;
+
+    return features;
+}
+
+std::vector<float>
+PCL_upd_DEMO::createFeaturesUPD(  )
+{
+    // prepare data for the classifier
+    std::vector<float> features;
+
+    // if we have no patch we cannot classify
+    if ( m_cloud_patch->size() < 1 || m_cloud_patch->size() < m_patch_labelling_index ) {
+        QMessageBox::information(this, "info !", " Patch size error !!");
+        return features; }
+
+    features.push_back( tan(UPD_cloud->points[m_patch_labelling_index].normal_x /
+                            UPD_cloud->points[m_patch_labelling_index].normal_y) * 360.0/M_PI ); // orientation in deg
+    features.push_back( tan(UPD_cloud->points[m_patch_labelling_index].normal_z /
+                            UPD_cloud->points[m_patch_labelling_index].normal_y) * 360.0/M_PI ); // orientation in deg
+    features.push_back( UPD_cloud->points[ m_patch_labelling_index ].radius );  // upd value
+
+    return features;
+
+}
+
 
 
 void PCL_upd_DEMO::labelGround()
 {
 
-    // if we have no patch we cannot classify
-    if ( m_cloud_patch->size() < 1 || m_cloud_patch->size() < m_patch_labelling_index ) {
-        QMessageBox::information(this, "info !", " Patch size error !!");
-        return; }
-
     // prepare data for the classifier
-    float f1 = tan(UPD_cloud->points[m_patch_labelling_index].normal_x / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
-    float f2 = tan(UPD_cloud->points[m_patch_labelling_index].normal_z / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
-    float f3 = UPD_cloud->points[ m_patch_labelling_index ].radius;
-    addSVMdataToTrainingSet( f1,  f2,  f3, +1.0 );
+    std::vector<float> featuresUPD = createFeaturesUPD();
+
+    std::vector<float> featuresReina = createFeaturesReina();
+
+    addSVMdataToTrainingSet( featuresUPD, +1.0 );
+
 
      QTreeWidgetItem * item = new QTreeWidgetItem();   // and update the widget for the visualization
      item->setText(0,"Ground");
@@ -72,11 +171,11 @@ void PCL_upd_DEMO::labelGround()
      item->setText(1,QString::fromStdString(ss.str()));
 
      ss.str("");
-     ss << " angle = " << f1 << " deg "
-                       << f2 << " deg ";
+     ss << " angle = " << featuresUPD.at(0) << " deg "
+                       << featuresUPD.at(1) << " deg ";
      item->setText(3,QString::fromStdString(ss.str()) );
      ss.str("");
-     ss << " upd = " << f3;
+     ss << " upd = " << featuresUPD.at(2);
      item->setText(2,QString::fromStdString(ss.str()) );
 
 
@@ -108,16 +207,12 @@ void PCL_upd_DEMO::labelGround()
 
 void PCL_upd_DEMO::labelNotGround()
 {
-  // if we have no patch we cannot classify
-    if ( m_cloud_patch->size() < 1 || m_cloud_patch->size() < m_patch_labelling_index ) {
-        QMessageBox::information(this, "info !", " Patch size error !!");
-        return; }
-
     // prepare data for the classifier
-    float f1 = tan(UPD_cloud->points[m_patch_labelling_index].normal_x / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
-    float f2 = tan(UPD_cloud->points[m_patch_labelling_index].normal_z / UPD_cloud->points[m_patch_labelling_index].normal_y)*360.0/M_PI;
-    float f3 = UPD_cloud->points[ m_patch_labelling_index ].radius;
-    addSVMdataToTrainingSet( f1,  f2,  f3, -1.0 );
+    std::vector<float> featuresUPD = createFeaturesUPD();
+
+    std::vector<float> featuresReina = createFeaturesReina();
+
+    addSVMdataToTrainingSet( featuresUPD, -1.0 );
 
      QTreeWidgetItem * item = new QTreeWidgetItem();   // and update the widget for the visualization
      item->setText(0,"NOT Ground");
@@ -129,11 +224,11 @@ void PCL_upd_DEMO::labelNotGround()
      item->setText(1,QString::fromStdString(ss.str()));
 
      ss.str("");
-     ss << " angle = " << f1 << " deg "
-                       << f2 << " deg ";
+     ss << " angle = " << featuresUPD.at(0) << " deg "
+                       << featuresUPD.at(1) << " deg ";
      item->setText(3,QString::fromStdString(ss.str()) );
      ss.str("");
-     ss << " upd = " << f3;
+     ss << " upd = " << featuresUPD.at(2);
      item->setText(2,QString::fromStdString(ss.str()) );
 
 
@@ -204,9 +299,6 @@ void PCL_upd_DEMO::copyPatchToClassifiable(const pcl::PointCloud<pcl::PointSurfe
         _cloud_out.push_back(classifiable_point.points[0]);
     }
 
-
-
-
 return;
 }
 
@@ -263,10 +355,9 @@ void PCL_upd_DEMO::extractPatch(double _size, float _x, float _y, float _z)
     QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 }
 
-
-
 void PCL_upd_DEMO::addSVMdataToTrainingSet(float _f1, float _f2, float _f3, float _label )
 {
+
 
     pcl::SVMDataPoint svm_data_point; //--> a data point just for simplicity
     pcl::SVMData svm_data;
@@ -284,6 +375,31 @@ void PCL_upd_DEMO::addSVMdataToTrainingSet(float _f1, float _f2, float _f3, floa
     svm_data_point.idx = 3;
     svm_data_point.value = _f3;
     svm_data.SV.push_back(svm_data_point);
+
+    m_training_set.push_back(svm_data);
+}
+
+void PCL_upd_DEMO::addSVMdataToTrainingSet(std::vector<float> _features, float _label )
+{
+
+    if (_features.size() < 1 )
+    {
+        std::cout << "PCL_upd_DEMO::addSVMdataToTrainingSet  << error >> : no features " << std::endl;
+        return;
+    }
+
+    pcl::SVMDataPoint svm_data_point; //--> a data point just for simplicity
+    pcl::SVMData svm_data;
+
+    svm_data.label = _label;
+
+    for (int i=0; i<_features.size(); i++)
+    {
+        svm_data_point.idx = i+1;
+        svm_data_point.value = _features.at(i);
+        svm_data.SV.push_back(svm_data_point);
+
+    }
 
     m_training_set.push_back(svm_data);
 }

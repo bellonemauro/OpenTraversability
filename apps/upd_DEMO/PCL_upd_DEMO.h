@@ -335,8 +335,35 @@ private slots:
 
 protected:
   
+ /** \brief add data to the training set according to a set of features,
+  *  \note -- deprecated
+  *  \return
+  */
   void
   addSVMdataToTrainingSet(float _f1, float _f2, float _f3, float _label );
+
+  /** \brief add data to the training set according to a set of features,
+   *  \note generalization to consider a not specified size vector
+   *  \return
+   */
+  void
+  addSVMdataToTrainingSet(std::vector<float> _features, float _label );
+
+  /** \brief create 4 features according to this reference,
+   *  \note  G. Reina, and A. Milella
+   *         "Towards autonomous agriculture: Automatic ground detection using trinocular stereovision."
+   *         Sensors 12.9 (2012): 12405-12423.
+   *  \return
+   */
+  std::vector<float>
+  createFeaturesReina( );
+
+  /** \brief create 4 features based on UPD,
+   *  \note
+   *  \return
+   */
+  std::vector<float>
+  createFeaturesUPD();
 
   void
   addSVMdataToTable(std::vector<pcl::SVMData> _data);
