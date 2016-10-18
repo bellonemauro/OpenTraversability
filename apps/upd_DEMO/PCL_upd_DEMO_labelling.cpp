@@ -103,7 +103,7 @@ PCL_upd_DEMO::createFeaturesReina()
     Eigen::Vector3d product = U.transpose() * normalDirection;
     std::cout << " product = " << product << "\n norm = " << product.norm() <<  std::endl;
     double slope = std::acos( product.norm());
-    std::cout << " slope = " << slope << std::endl;
+    std::cout << " slope = " << slope << std::endl; //this must be a number so U is actually the eigenvector associated to the smallest eigenvalue
 
     // smallest singular value
     float small_singular_value = singular_values(2, 2);
@@ -138,11 +138,22 @@ PCL_upd_DEMO::createFeaturesUPD(  )
         QMessageBox::information(this, "info !", " Patch size error !!");
         return features; }
 
-    features.push_back( tan(UPD_cloud->points[m_patch_labelling_index].normal_x /
-                            UPD_cloud->points[m_patch_labelling_index].normal_y) * 360.0/M_PI ); // orientation in deg
-    features.push_back( tan(UPD_cloud->points[m_patch_labelling_index].normal_z /
-                            UPD_cloud->points[m_patch_labelling_index].normal_y) * 360.0/M_PI ); // orientation in deg
+    Eigen::Vector3d vec ( UPD_cloud->points[m_patch_labelling_index].normal_x,
+                          UPD_cloud->points[m_patch_labelling_index].normal_y,
+                          UPD_cloud->points[m_patch_labelling_index].normal_z);
+    double norm = vec.norm();
+    features.push_back( UPD_cloud->points[m_patch_labelling_index].normal_x / norm );
+    features.push_back( UPD_cloud->points[m_patch_labelling_index].normal_y / norm );
+    features.push_back( UPD_cloud->points[m_patch_labelling_index].normal_z / norm );
     features.push_back( UPD_cloud->points[ m_patch_labelling_index ].radius );  // upd value
+    features.push_back( norm );
+    double cloud_density = 100.0; //points per square meter
+    double m_e = cloud_density * M_PI * std::pow(m_upd->getSearchRadius(), 2);
+    std::cout << " the UPD cloud size for the patch is " << UPD_cloud->size()
+              << " m_ e = " << m_e
+              << " C = K/M_E " << UPD_cloud->size() / m_e << std::endl;
+    features.push_back( UPD_cloud->size() / m_e );
+
 
     return features;
 
@@ -171,11 +182,12 @@ void PCL_upd_DEMO::labelGround()
      item->setText(1,QString::fromStdString(ss.str()));
 
      ss.str("");
-     ss << " angle = " << featuresUPD.at(0) << " deg "
-                       << featuresUPD.at(1) << " deg ";
+     ss << " r-vector = " << featuresUPD.at(0) << " -- "
+                       << featuresUPD.at(1) << " -- "
+                       << featuresUPD.at(2) << " -- ";
      item->setText(3,QString::fromStdString(ss.str()) );
      ss.str("");
-     ss << " upd = " << featuresUPD.at(2);
+     ss << " upd = " << featuresUPD.at(3);
      item->setText(2,QString::fromStdString(ss.str()) );
 
 
@@ -202,6 +214,9 @@ void PCL_upd_DEMO::labelGround()
      viewer->addArrow(P1, P2, 0.0, 1.0, 0.0, false, "arrow", 0);
      }
      ui->qvtkWidget->update ();
+     int num = ui->lcdNumber_ground->intValue();
+     num++;
+     ui->lcdNumber_ground->display(num);
 
 }
 
@@ -224,11 +239,12 @@ void PCL_upd_DEMO::labelNotGround()
      item->setText(1,QString::fromStdString(ss.str()));
 
      ss.str("");
-     ss << " angle = " << featuresUPD.at(0) << " deg "
-                       << featuresUPD.at(1) << " deg ";
+     ss << " r-vector = " << featuresUPD.at(0) << " -- "
+                       << featuresUPD.at(1) << " -- "
+                       << featuresUPD.at(2) << " -- ";
      item->setText(3,QString::fromStdString(ss.str()) );
      ss.str("");
-     ss << " upd = " << featuresUPD.at(2);
+     ss << " upd = " << featuresUPD.at(3);
      item->setText(2,QString::fromStdString(ss.str()) );
 
 
@@ -254,6 +270,9 @@ void PCL_upd_DEMO::labelNotGround()
      else { viewer->removeShape("arrow",0);
      viewer->addArrow(P1, P2, 1.0, 0.0, 0.0, false, "arrow", 0);
      }ui->qvtkWidget->update ();
+     int num = ui->lcdNumber_notGround->intValue();
+     num++;
+     ui->lcdNumber_notGround->display(num);
 
 }
 
@@ -510,23 +529,17 @@ void PCL_upd_DEMO::classification()
     }
 
 
-    float f1 = tan(UPD_cloud->points[m_patch_labelling_index].normal_x /
-                   UPD_cloud->points[m_patch_labelling_index].normal_y ) * 360.0/M_PI;
-    float f2 = tan(UPD_cloud->points[m_patch_labelling_index].normal_z /
-                   UPD_cloud->points[m_patch_labelling_index].normal_y ) * 360.0/M_PI;
-    float f3 = UPD_cloud->points[ m_patch_labelling_index ].radius;
+    std::vector<float> featuresUPD = createFeaturesUPD();
 
-    svm_data_point.idx = 1;
-    svm_data_point.value = f1;
-    svm_data.SV.push_back(svm_data_point);
+    for (int i=0; i<featuresUPD.size(); i++)
+    {
+        svm_data_point.idx = i+1;
+        svm_data_point.value = featuresUPD.at(i);
+        svm_data.SV.push_back(svm_data_point);
 
-    svm_data_point.idx = 2;
-    svm_data_point.value = f2;
-    svm_data.SV.push_back(svm_data_point);
+    }
 
-    svm_data_point.idx = 3;
-    svm_data_point.value = f3;
-    svm_data.SV.push_back(svm_data_point);
+    ////////////////////////////////////////////////////////TODO !!!!!!!!!!!
 
     std::vector<pcl::SVMData> test_set;
     test_set.push_back(svm_data);

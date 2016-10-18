@@ -143,6 +143,13 @@ void PCL_upd_DEMO::openPCDFolder ()
         QStringList file_pcd_list;
         file_pcd_list = m_dir.entryList( nameFilter, QDir::Files | QDir::NoDotAndDotDot );
 
+        if (file_pcd_list.size() < 1 )
+        {
+            QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+            QMessageBox::warning(this, "Warning !", "No PCD files in folder " + m_dir.currentPath());
+            return;
+        }
+
         m_file_pcd_list.clear();
         for (unsigned int i=0; i < file_pcd_list.size(); i++)
         {
@@ -158,6 +165,45 @@ void PCL_upd_DEMO::openPCDFolder ()
         }
         ui->listWidget_pcdNames->clear();
         ui->listWidget_pcdNames->addItems(m_file_pcd_list);
+
+
+        nameFilter.clear();
+        nameFilter << "*.jpg" << "*.pgn" << "*.pgm" << "*.bmp";
+        QStringList file_images_list;
+        file_images_list = m_dir.entryList( nameFilter, QDir::Files | QDir::NoDotAndDotDot );
+
+        if (file_images_list.size()>1)
+        {
+            QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+            QMessageBox::StandardButton answer;
+            answer = QMessageBox::question( this, "Warning !",
+                                            "Images files found in the folder " + m_dir.currentPath() + " Do you want to load images ?",
+                                            QMessageBox::Yes|QMessageBox::No);
+            if (answer == QMessageBox::No )
+            {
+                return;
+            }
+            else
+            {
+                m_file_image_list.clear();
+                for (unsigned int i=0; i < file_images_list.size(); i++)
+                {
+                    QString file_with_absolute_path = m_dir.path();
+                    //std::cout << file_images_list.at(i).toStdString() << std::endl;
+
+                    file_with_absolute_path.append("/");
+                    file_with_absolute_path.append(file_images_list.at(i));
+
+                    //std::cout << file_with_absolute_path.toStdString() << std::endl;
+                    m_file_image_list.push_back(file_with_absolute_path);
+
+                }
+                ui->listWidget_imageNames->clear();
+                ui->listWidget_imageNames->addItems(m_file_image_list);
+            }
+        }
+
+
 }
 
 void PCL_upd_DEMO::openImagesFolder ()
@@ -170,6 +216,14 @@ void PCL_upd_DEMO::openImagesFolder ()
         nameFilter << "*.jpg" << "*.pgn" << "*.pgm" << "*.bmp";
         QStringList file_images_list;
         file_images_list = m_dir.entryList( nameFilter, QDir::Files | QDir::NoDotAndDotDot );
+
+        if (file_images_list.size() < 1 )
+        {
+            QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+            QMessageBox::warning(this, "Warning !", "No image files in folder " + m_dir.currentPath());
+            return;
+        }
+
 
         m_file_image_list.clear();
         for (unsigned int i=0; i < file_images_list.size(); i++)
@@ -186,6 +240,42 @@ void PCL_upd_DEMO::openImagesFolder ()
         }
         ui->listWidget_imageNames->clear();
         ui->listWidget_imageNames->addItems(m_file_image_list);
+
+        nameFilter.clear();
+        nameFilter << "*.pcd" << "*.bin";
+        QStringList file_pcd_list;
+        file_pcd_list = m_dir.entryList( nameFilter, QDir::Files | QDir::NoDotAndDotDot );
+
+        if (file_pcd_list.size()>1)
+        {
+            QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+            QMessageBox::StandardButton answer;
+            answer = QMessageBox::question( this, "Warning !",
+                                            "Point cloud files found in the folder " + m_dir.currentPath() + " Do you want to load images ?",
+                                            QMessageBox::Yes|QMessageBox::No);
+            if (answer == QMessageBox::No )
+            {
+                return;
+            }
+            else
+            {
+                m_file_pcd_list.clear();
+                for (unsigned int i=0; i < file_pcd_list.size(); i++)
+                {
+                    QString file_with_absolute_path = m_dir.path();
+                    //std::cout << file_pcd_list.at(i).toStdString() << std::endl;
+
+                    file_with_absolute_path.append("/");
+                    file_with_absolute_path.append(file_pcd_list.at(i));
+
+                    //std::cout << file_with_absolute_path.toStdString() << std::endl;
+                    m_file_pcd_list.push_back(file_with_absolute_path);
+
+                }
+                ui->listWidget_pcdNames->clear();
+                ui->listWidget_pcdNames->addItems(m_file_pcd_list);
+            }
+        }
 }
 
 

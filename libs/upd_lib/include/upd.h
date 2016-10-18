@@ -124,6 +124,11 @@ public:
      **/
     bool writeUPDcloud(std::string _fileName );
 
+    /* Get the search radius used in the last calculation
+     *
+     **/
+    inline double getSearchRadius( ){ return m_search_radius;}
+
     /* get the result upd cloud
      *
      **/
