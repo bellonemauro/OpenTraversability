@@ -17,6 +17,9 @@ include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${Boost_LIBRARY_DIR})
 include_directories(${Boost_INCLUDE_DIRS})
 
+#TODO: this must be set manually now - otherwise it will not be found, build a find_package(tiny_dnn)
+include_directories(${TINYCNN_INCLUDE_DIR})
+message (STATUS "TINYCNN_INCLUDE_DIR   :::   ${TINYCNN_INCLUDE_DIR}")
 
 find_package ( VTK REQUIRED)
 
@@ -77,7 +80,7 @@ if (NOT UNIX)
 							${Boost_LIBRARIES}
 							${PCL_LIBRARIES} )
 
-elseif ()
+elseif (UNIX)
 	message (STATUS "PCL_UPD_DEMO ---- UNIX found")
 	target_link_libraries ( PCL_upd_DEMO  upd_lib  Qt4::QtGui QVTK
 							${Boost_LIBRARIES}

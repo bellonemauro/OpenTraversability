@@ -1097,13 +1097,6 @@
               <string>Manual Labelling</string>
              </attribute>
              <layout class="QGridLayout" name="gridLayout_3">
-              <item row="8" column="0">
-               <widget class="QLabel" name="label">
-                <property name="text">
-                 <string>Patch size (m)</string>
-                </property>
-               </widget>
-              </item>
               <item row="1" column="1">
                <widget class="QPushButton" name="pushButton_removePoint">
                 <property name="enabled">
@@ -1114,23 +1107,6 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QPushButton" name="pushButton_addPoint">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>+</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="4">
-               <widget class="QPushButton" name="pushButton_classify">
-                <property name="text">
-                 <string>What's this?</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="0" colspan="2">
                <widget class="QPushButton" name="pushButton_start_stopLabelling">
                 <property name="text">
@@ -1138,17 +1114,14 @@
                 </property>
                </widget>
               </item>
-              <item row="6" column="0" colspan="2">
-               <widget class="QPushButton" name="pushButton_clearLabelling">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
+              <item row="6" column="0">
+               <widget class="QLabel" name="label">
                 <property name="text">
-                 <string>Clear</string>
+                 <string>Patch size (m)</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="3" rowspan="9">
+              <item row="0" column="4" rowspan="7">
                <widget class="QTreeWidget" name="treeWidget_classification">
                 <column>
                  <property name="text">
@@ -1172,214 +1145,7 @@
                 </column>
                </widget>
               </item>
-              <item row="8" column="5">
-               <widget class="QPushButton" name="pushButton_smvTest">
-                <property name="text">
-                 <string>SVM test</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="1">
-               <widget class="QLineEdit" name="lineEdit_patchSize">
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>0.50</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="4">
-               <widget class="QLabel" name="label_3">
-                <property name="text">
-                 <string>Gamma</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="5">
-               <widget class="QLineEdit" name="lineEdit_SVMgamma">
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>2.5</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="4">
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>C</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="5">
-               <widget class="QLineEdit" name="lineEdit_SVMc">
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="5">
-               <widget class="QLineEdit" name="lineEdit_SVMdegree">
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>3</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="4">
-               <widget class="QLabel" name="label_31">
-                <property name="text">
-                 <string>Degree</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="4" colspan="2">
-               <widget class="QPushButton" name="pushButton_train">
-                <property name="text">
-                 <string>train the classifier</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="5">
-               <widget class="QCheckBox" name="checkBox_probability">
-                <property name="text">
-                 <string>probability</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="4">
-               <widget class="QCheckBox" name="checkBox_Shrinking">
-                <property name="text">
-                 <string>Shrinking</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="5">
-               <widget class="QComboBox" name="comboBox_svmKernelType">
-                <property name="minimumSize">
-                 <size>
-                  <width>130</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="currentIndex">
-                 <number>2</number>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>LINEAR</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>POLY</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>RBF</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>SIGMOID</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>PRECOMPUTED</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="3" column="5">
-               <widget class="QComboBox" name="comboBox_SVMtype">
-                <item>
-                 <property name="text">
-                  <string>C_SVC</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>NU_SVC</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>ONE_CLASS</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>EPSILON_SVR</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>NU_SVR</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="3" column="4">
-               <widget class="QLabel" name="label_32">
-                <property name="text">
-                 <string>SVM type</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="4">
-               <widget class="QLabel" name="label_33">
-                <property name="text">
-                 <string>Kernel type</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QPushButton" name="pushButton_ground">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>Ground</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
+              <item row="2" column="1">
                <widget class="QLCDNumber" name="lcdNumber_ground">
                 <property name="enabled">
                  <bool>true</bool>
@@ -1395,17 +1161,7 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="0">
-               <widget class="QPushButton" name="pushButton_notGround">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>Not Ground</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1">
+              <item row="3" column="1">
                <widget class="QLCDNumber" name="lcdNumber_notGround">
                 <property name="enabled">
                  <bool>true</bool>
@@ -1418,6 +1174,800 @@
                 </property>
                 <property name="segmentStyle">
                  <enum>QLCDNumber::Flat</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0" colspan="2">
+               <widget class="QPushButton" name="pushButton_clearLabelling">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Clear</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="pushButton_addPoint">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>+</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QLineEdit" name="lineEdit_patchSize">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>0.50</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QPushButton" name="pushButton_notGround">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>Not Ground</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QTreeWidget" name="treeWidget_featuresSelection">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>200</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <column>
+                 <property name="text">
+                  <string>Feature</string>
+                 </property>
+                </column>
+                <item>
+                 <property name="text">
+                  <string>Features Shape</string>
+                 </property>
+                 <property name="checkState">
+                  <enum>Checked</enum>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>UPD (6 values, normals upd, angles)</string>
+                 </property>
+                 <property name="checkState">
+                  <enum>Checked</enum>
+                 </property>
+                 <property name="flags">
+                  <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Feature Reina</string>
+                 </property>
+                 <property name="checkState">
+                  <enum>Checked</enum>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Color</string>
+                 </property>
+                 <property name="checkState">
+                  <enum>Unchecked</enum>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>feature n</string>
+                 </property>
+                 <property name="checkState">
+                  <enum>Unchecked</enum>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QPushButton" name="pushButton_ground">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>Ground</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="pushButton_sub2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>sub2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QPushButton" name="pushButton_sub3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>sub3</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <widget class="QPushButton" name="pushButton_sub4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>sub4</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="2">
+               <widget class="QPushButton" name="pushButton_sub5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>sub5</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="2">
+               <widget class="QPushButton" name="pushButton_sub6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>sub6</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QPushButton" name="pushButton_sub1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>sub1</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="SVM">
+             <attribute name="title">
+              <string>SVM</string>
+             </attribute>
+             <layout class="QGridLayout" name="gridLayout_10">
+              <item row="0" column="3">
+               <widget class="QPushButton" name="pushButton_smvTest">
+                <property name="text">
+                 <string>SVM test</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="4" rowspan="6">
+               <widget class="QFrame" name="frame_7">
+                <property name="maximumSize">
+                 <size>
+                  <width>300</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_14">
+                 <item row="5" column="3">
+                  <widget class="QComboBox" name="comboBox_svmKernelType">
+                   <property name="minimumSize">
+                    <size>
+                     <width>130</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="currentIndex">
+                    <number>2</number>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>LINEAR</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>POLY</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>RBF</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>SIGMOID</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PRECOMPUTED</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="3" column="3">
+                  <widget class="QLineEdit" name="lineEdit_SVMdegree">
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>3</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="3">
+                  <widget class="QComboBox" name="comboBox_SVMtype">
+                   <item>
+                    <property name="text">
+                     <string>C_SVC</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>NU_SVC</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>ONE_CLASS</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>EPSILON_SVR</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>NU_SVR</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="5" column="2">
+                  <widget class="QLabel" name="label_33">
+                   <property name="text">
+                    <string>Kernel type</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="3">
+                  <widget class="QLineEdit" name="lineEdit_SVMgamma">
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>2.5</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>Gamma</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="2">
+                  <widget class="QLabel" name="label_32">
+                   <property name="text">
+                    <string>SVM type</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="3">
+                  <widget class="QCheckBox" name="checkBox_Shrinking">
+                   <property name="text">
+                    <string>Shrinking</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2" colspan="2">
+                  <widget class="QLabel" name="label_36">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>SVM parameters</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="2">
+                  <widget class="QLabel" name="label_31">
+                   <property name="text">
+                    <string>Degree</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="2">
+                  <widget class="QLabel" name="label_5">
+                   <property name="text">
+                    <string>C</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="3">
+                  <widget class="QLineEdit" name="lineEdit_SVMc">
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="2">
+                  <widget class="QCheckBox" name="checkBox_probability">
+                   <property name="layoutDirection">
+                    <enum>Qt::LeftToRight</enum>
+                   </property>
+                   <property name="text">
+                    <string>probability</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="3" column="3">
+               <widget class="QPushButton" name="pushButton_train">
+                <property name="text">
+                 <string>train the classifier</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QPushButton" name="pushButton_classifyCloud">
+                <property name="text">
+                 <string>Classify Cloud</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3">
+               <widget class="QPushButton" name="pushButton_classify">
+                <property name="text">
+                 <string>What's this?</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" rowspan="6">
+               <widget class="QTreeWidget" name="treeWidget_SVMclasses">
+                <column>
+                 <property name="text">
+                  <string>Subclass 1</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Class</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Subclass 2</string>
+                 </property>
+                </column>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="CNN">
+             <attribute name="title">
+              <string>CNN</string>
+             </attribute>
+             <layout class="QGridLayout" name="gridLayout_15">
+              <item row="2" column="4" rowspan="6">
+               <widget class="QFrame" name="frame_9">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_17">
+                 <item row="0" column="2">
+                  <widget class="QLabel" name="label_44">
+                   <property name="text">
+                    <string>b1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="3">
+                  <widget class="QLineEdit" name="lineEdit_cnnB1">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="text">
+                    <string>0.9</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QLabel" name="label_45">
+                   <property name="text">
+                    <string>b2</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="3">
+                  <widget class="QLineEdit" name="lineEdit_cnnb2">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="text">
+                    <string>0.999</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="2">
+                  <widget class="QLabel" name="label_46">
+                   <property name="text">
+                    <string>b1_t</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="3">
+                  <widget class="QLineEdit" name="lineEdit_cnnB1_t">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="text">
+                    <string>0.9</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="3">
+                  <widget class="QLineEdit" name="lineEdit_cnnb2_t">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="text">
+                    <string>0.999</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="2">
+                  <widget class="QLabel" name="label_47">
+                   <property name="text">
+                    <string>b2_t</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QLineEdit" name="lineEdit_cnnLambda">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="0">
+                  <widget class="QLabel" name="label_43">
+                   <property name="text">
+                    <string>Lambda</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QLineEdit" name="lineEdit_cnnMu">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="text">
+                    <string>0.99</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_42">
+                   <property name="text">
+                    <string>Mu</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="lineEdit_cnnAlpha">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="text">
+                    <string>0.01</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_41">
+                   <property name="text">
+                    <string>Alpha</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0" colspan="2">
+                  <widget class="QLabel" name="label_48">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                     <weight>75</weight>
+                     <italic>true</italic>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Optimizer parameter</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QPushButton" name="pushButton_trainCNN">
+                <property name="text">
+                 <string>train CNN</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QPushButton" name="pushButton_getTrainingDatasetFromSVMdata">
+                <property name="text">
+                 <string>get training dataset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3" rowspan="6">
+               <widget class="QFrame" name="frame_8">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_16">
+                 <item row="2" column="3">
+                  <widget class="QComboBox" name="comboBox_activationFunction">
+                   <item>
+                    <property name="text">
+                     <string>tan_h</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>sigmoid</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>softmax</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>rectified linear (relu)</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>leaky relu</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>identity</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>exponential linear unit (elu)</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_39">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                     <weight>75</weight>
+                     <italic>true</italic>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>CNN params</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="3">
+                  <widget class="QComboBox" name="comboBox_lossFunction">
+                   <item>
+                    <property name="text">
+                     <string>cross-entropy</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>mean squared error</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>mean absolute error</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>mean absolute error (with range)</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="5" column="0">
+                  <widget class="QLabel" name="label_38">
+                   <property name="text">
+                    <string>Optimization algorithms</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="0">
+                  <widget class="QLabel" name="label_35">
+                   <property name="text">
+                    <string>Epochs</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="3">
+                  <widget class="QLineEdit" name="lineEdit_cnnEphocs">
+                   <property name="text">
+                    <string>5</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_37">
+                   <property name="text">
+                    <string>Activation function </string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_40">
+                   <property name="text">
+                    <string>Loss functions</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="3">
+                  <widget class="QComboBox" name="comboBox_optimizationAlgorithms">
+                   <item>
+                    <property name="text">
+                     <string>adagrad</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>rmsprop</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>adam</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>SGD (Stochastic Gradient Descent)</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>SGD with momentum</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="6" column="0">
+                  <widget class="QLabel" name="label_34">
+                   <property name="text">
+                    <string>Full connected neurons</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="3">
+                  <widget class="QLineEdit" name="lineEdit_cnnNeurons">
+                   <property name="text">
+                    <string>20</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <widget class="QPushButton" name="pushButton_classifyCNN">
+                <property name="text">
+                 <string>What's this?</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QPushButton" name="pushButton_testCNN">
+                <property name="text">
+                 <string>test CNN</string>
                 </property>
                </widget>
               </item>

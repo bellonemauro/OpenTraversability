@@ -10,11 +10,11 @@
 #include "PCL_upd_DEMO.h"
 
 
-  void PCL_upd_DEMO::runUPD()
-  {
+void PCL_upd_DEMO::runUPD()
+{
   m_upd = new upd;
-   QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
-   //QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+  QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+  //QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
 	if (ui->checkBox_applyTrans->isChecked())
 	{
@@ -70,11 +70,11 @@
 
  QMessageBox::warning(this, "Warning !", "upd properly generated with size " + QString::number( UPD_cloud->size() ) );
 
-  }
+}
 
-  void PCL_upd_DEMO::runUPDpatch()
-  {
-  m_upd = new upd; ///-->substitute with pathc
+void PCL_upd_DEMO::runUPDpatch()
+{
+  m_upd = new upd; ///-->substitute with patch
    QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
    //QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
@@ -125,7 +125,7 @@
 
 // QMessageBox::warning(this, "Warning !", "upd properly generated with size " + QString::number( UPD_cloud->size() ) );
 
-  }
+}
 
 void PCL_upd_DEMO::switchVisualization()
 {
@@ -172,34 +172,33 @@ void PCL_upd_DEMO::switchVisualization()
 
 void PCL_upd_DEMO::setRadiusOrKNeighborsMethod()
 {
-    if (ui->radioButton_kNeighbors->isChecked())
-    {
-        ui->radioButton_radius->setChecked(false);
-    }
-    else
-    {	ui->radioButton_kNeighbors->setChecked(false);
-    }
+  if (ui->radioButton_kNeighbors->isChecked())
+  {
+    ui->radioButton_radius->setChecked(false);
+  }
+  else
+  {
+    ui->radioButton_kNeighbors->setChecked(false);
+  }
 
 }
 
 
-void   PCL_upd_DEMO::unevenessSliderChange(int value)
-  {
-	QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+void   PCL_upd_DEMO::unevenessSliderChange(int _value)
+{
+QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
 
-	double _value = value/10000.0;
-	ui->lcdNumber_unevenness->setSmallDecimalPoint(true);
-	ui->lcdNumber_unevenness->display(double(_value));  // 100 to bring the slider integer between 0-100 to 0-1 as unevenness index value
-	
-	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
-  }
+double value = _value/10000.0;
+ui->lcdNumber_unevenness->setSmallDecimalPoint(true);
+ui->lcdNumber_unevenness->display(double(value));  // 100 to bring the slider integer between 0-100 to 0-1 as unevenness index value
+
+QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+}
 
 
-void PCL_upd_DEMO::angleSliderChange(int value)
-  {
-  	QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
-	
-	ui->lcdNumber_thresholdAngle->display(value);
-
-	QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
-  }
+void PCL_upd_DEMO::angleSliderChange(int _value)
+{
+QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+ui->lcdNumber_thresholdAngle->display(_value);
+QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+}

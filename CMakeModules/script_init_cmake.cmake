@@ -57,6 +57,25 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 		          OUTPUT_VARIABLE CMAKE_OTA_GCC_VERSION_FULL
 		          OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+	  # set the compiler version to g++11
+	  if (CMAKE_VERSION VERSION_LESS "3.1")
+	    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	      set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
+	    endif ()
+	  else ()
+	    set (CMAKE_CXX_STANDARD 11)
+	  endif ()
+
+	# we enable standard C++11 multithread support.
+	if( NOT WIN32 )
+	    #list(APPEND EXTRA_C_FLAGS -pthread)
+	    set(USE_PTHREAD ON)
+	    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+	    message(STATUS "TBB and OMP disabled: Using Pthread instead.")
+	else( NOT WIN32 )
+	    set(USE_PTHREAD OFF)
+	endif( NOT WIN32 )
+
 	# Output in CMAKE_OTA_GCC_VERSION_FULL: "X.Y"
 	#  Look for the version number
 	STRING(REGEX MATCH "[0-9]+.[0-9]+" CMAKE_GCC_REGEX_VERSION "${CMAKE_OTA_GCC_VERSION_FULL}")
@@ -72,7 +91,10 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 	IF($ENV{VERBOSE})
 		MESSAGE(STATUS "gcc -dumpversion: ${CMAKE_OTA_GCC_VERSION_FULL}  -> Major=${CMAKE_OTA_GCC_VERSION_MAJOR} Minor=${CMAKE_OTA_GCC_VERSION_MINOR}")
 	ENDIF($ENV{VERBOSE})
+
+
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+
 
 
 # ----------------------------------------------------------------------------

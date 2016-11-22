@@ -17,6 +17,22 @@ include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${Boost_LIBRARY_DIR})
 include_directories(${Boost_INCLUDE_DIRS})
 
+#TODO: this must be set manually now - otherwise it will not be found, build a find_package(tiny_dnn)
+include_directories(${TINYCNN_INCLUDE_DIR})
+message (STATUS "TINYCNN_INCLUDE_DIR   :::   ${TINYCNN_INCLUDE_DIR}")
+
+set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
+
+# we enable standard C++11 multithread support.
+if( NOT WIN32 )
+    #list(APPEND EXTRA_C_FLAGS -pthread)
+    set(USE_PTHREAD ON)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+    message(STATUS "TBB and OMP disabled: Using Pthread instead.")
+else( NOT WIN32 )
+    set(USE_PTHREAD OFF)
+endif( NOT WIN32 )
+
 
 find_package ( VTK REQUIRED)
 

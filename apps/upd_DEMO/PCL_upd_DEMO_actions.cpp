@@ -387,7 +387,7 @@ void
 PCL_upd_DEMO::saveTrainingDataset()
 {
 
-    if (m_training_set.size()<1 ) {
+    if (m_svm_training_set.size()<1 ) {
         QMessageBox::warning(this, "Warning !", "NO training data to be saved ! " );
         return;
     }
@@ -403,7 +403,7 @@ PCL_upd_DEMO::saveTrainingDataset()
     }
 
     m_svm_trainer.resetTrainingSet();
-    m_svm_trainer.setInputTrainingSet(m_training_set);
+    m_svm_trainer.setInputTrainingSet(m_svm_training_set);
     if (!m_svm_trainer.saveNormTrainingSet ( save_path.toUtf8().constData() ) )
         QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + save_path);
     else
@@ -534,14 +534,15 @@ if (!m_svm_trainer.loadProblem (load_path.toUtf8().constData()) ){
 
 ///TODO IMPORTANT: if the training set has data, they may be replaced
 m_svm_trainer.adaptProbToInput();
-m_training_set = m_svm_trainer.getInputTrainingSet();
-addSVMdataToTable(m_training_set);
+m_svm_training_set = m_svm_trainer.getInputTrainingSet();
+addSVMdataToTable(m_svm_training_set);
+adaptTrainingSetFromSVMdataset();
 
 //m_training_set = m_svm_classifier.getInputTrainingSet();
 
 QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
 
-std::cout << " dataset loaded " << m_training_set.size() << std::endl;
+std::cout << " dataset loaded " << m_svm_training_set.size() << std::endl;
 
 }
 

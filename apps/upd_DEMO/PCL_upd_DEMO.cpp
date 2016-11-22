@@ -20,6 +20,7 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
 
   // Setup the cloud pointer
   m_cloud.reset (new PointCloudT);
+  m_cloud_classifiedGNG.reset (new PointCloudT);
   m_cloud_color_UPD.reset(new PointCloudT);
   m_cloud_filtered.reset (new PointCloudT);
   m_labeled_point.reset (new PointCloudT);
@@ -34,6 +35,24 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   m_patch_labelling_index = 0;
   m_labelling_active = false;
   m_labelled_paused = false;
+
+
+  //initialize parameters for the cnn
+  m_alpha_adagrad = 0.01;
+  m_alpha_RMSprop = 0.0001;
+  m_mu_RMSprop = 0.99;
+  m_alpha_adam = 0.001;
+  m_b1_adam = 0.9;
+  m_b2_adam = 0.999;
+  m_b1_t_adam = 0.9;
+  m_b2_t_adam = 0.999;
+  m_alpha_sgd = 0.01;
+  m_lambda_sgd = 0.0;
+  m_alpha_sgdm = 0.01;
+  m_lambda_sgdm = 0.1;
+  m_mu_sgdm = 0.9;
+  m_cnn_batch_size = 1;
+  m_cnn_epoch = 1;
 
   if (pcl::io::loadPCDFile ("./logo.pcd", *m_cloud) == -1) //* load the file
   {
@@ -116,11 +135,16 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->pushButton_ground, SIGNAL(clicked()), this, SLOT (labelGround()));
   connect (ui->pushButton_notGround, SIGNAL(clicked()), this, SLOT (labelNotGround()));
   connect (ui->pushButton_clearLabelling, SIGNAL(clicked()), this, SLOT (clearLabelling()));
-  connect (ui->pushButton_train, SIGNAL(clicked()), this, SLOT (trainClassifier()));
+  connect (ui->pushButton_train, SIGNAL(clicked()), this, SLOT (trainSVMClassifier()));
   //connect (ui->pushButton_saveTrainingSet, SIGNAL(clicked()), this, SLOT (saveTrainingDataset()));
   //connect (ui->pushButton_classModel, SIGNAL(clicked()), this, SLOT (saveClassifierModel()));
-  connect (ui->pushButton_classify, SIGNAL(clicked()), this, SLOT (classification()));
-  connect (ui->pushButton_smvTest, SIGNAL(clicked()), this, SLOT (classificationTest()));
+  connect (ui->pushButton_classify, SIGNAL(clicked()), this, SLOT (SVMpatchClassification()));
+  connect (ui->pushButton_smvTest, SIGNAL(clicked()), this, SLOT (SVMclassificationTest()));
+  connect (ui->pushButton_classifyCloud, SIGNAL(clicked()), this, SLOT(SVMclassifyCloud()));
+  connect (ui->pushButton_trainCNN, SIGNAL(clicked()), this, SLOT(trainCNN()));
+  connect (ui->pushButton_classifyCNN, SIGNAL(clicked()), this, SLOT(CNNclassification()));
+  connect (ui->pushButton_getTrainingDatasetFromSVMdata, SIGNAL(clicked()), this, SLOT(adaptTrainingSetFromSVMdataset()));
+  connect (ui->pushButton_testCNN, SIGNAL(clicked()), this, SLOT(testCNN()));
 
   // sliders
   connect (ui->horizontalSlider_p, SIGNAL (valueChanged (int)), this, SLOT (pointSizeSliderValueChanged (int)));
@@ -138,6 +162,8 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
 
   connect (ui->checkBox_visTraversability, SIGNAL (clicked()), this, SLOT(switchVisualization()));
   connect (ui->checkBox_coordinateSystem, SIGNAL (clicked()), this, SLOT(addRemoveCoordinateSystem()));
+  connect (ui->comboBox_optimizationAlgorithms, SIGNAL(currentIndexChanged(int)), this, SLOT(optimizationChanged(int)));
+
 
    ui->treeWidget_classification->resizeColumnToContents(0);
    ui->treeWidget_classification->resizeColumnToContents(1);
@@ -328,7 +354,7 @@ void PCL_upd_DEMO::pp_callback ( const pcl::visualization::PointPickingEvent& ev
   data->viewerPtr->removePointCloud("clicked_points");
   data->viewerPtr->addPointCloud(data->m_clicked_points_3d, red, "clicked_points");
   data->viewerPtr->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "clicked_points");
-  std::cout << current_point.x << " " << current_point.y << " " << current_point.z << std::endl;
+  //std::cout << current_point.x << " " << current_point.y << " " << current_point.z << std::endl;
 
   double patch_size = 0.0;
   bool isNumeric;
