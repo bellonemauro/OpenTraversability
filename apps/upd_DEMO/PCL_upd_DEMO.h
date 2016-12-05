@@ -497,11 +497,14 @@ protected:
    {
        tiny_dnn::label_t _label;   // a single label identify the classe of a vector
        tiny_dnn::vec_t   _vec;     // this is 1 single vector o data (e.g. one image)
+
    };
 
    struct  tiny_dnn_dataset     //this vector contains 1 label for each vector image
    {
     std::vector<tiny_dnn_data_point> _data;
+    std::vector<float> _data_mean;
+    std::vector<float> _data_std;
 
     std::vector<tiny_dnn::vec_t> dataVectors_t ()
     {
@@ -509,6 +512,7 @@ protected:
         for (unsigned int i=0; i<this->_data.size(); i++)
         {
             _out.push_back(this->_data.at(i)._vec);
+
         }
      return _out;
     }
@@ -522,6 +526,59 @@ protected:
         }
      return _out;
     }
+
+
+    void normalize_data()
+    {
+        if (this->_data.size() < 1 )
+        {
+            return;
+        }
+// implementation of a standardization method x'=(x-E(x))/sigma
+
+       this->_data_mean.resize(this->_data.at(0)._vec.size());
+       this->_data_std.resize(this->_data.at(0)._vec.size());
+
+        std::vector<float> sum;
+        std::vector<float> sq_sum;
+        sum.resize(this->_data.at(0)._vec.size());
+        sq_sum.resize(this->_data.at(0)._vec.size());
+        for ( int i = 0; i < this->_data.size(); i++)
+       {
+
+           for ( int j = 0; j < this->_data.at(i)._vec.size(); j++)
+           {
+             sum.at(j) += this->_data.at(i)._vec.at(j);
+           }
+
+           for ( int j = 0; j < this->_data.at(i)._vec.size(); j++)
+           {
+             this->_data_mean.at(j) = sum.at(j)/this->_data.at(i)._vec.size();
+           }
+
+           for ( int j = 0; j < this->_data.at(i)._vec.size(); j++)
+           {
+             sq_sum.at(j) += std::pow(this->_data.at(i)._vec.at(j) - this->_data_mean.at(j),2);
+           }
+
+           for ( int j = 0; j < this->_data.at(i)._vec.size(); j++)
+           {
+             this->_data_std.at(j) = std::sqrt(sq_sum.at(j)/this->_data.at(i)._vec.size());
+           }
+
+       }
+
+        for ( int i = 0; i < this->_data.size(); i++)
+        {
+            for ( int j = 0; j < this->_data.at(i)._vec.size(); j++)
+            {
+                this->_data.at(i)._vec.at(j) = (this->_data.at(i)._vec.at(j) - this->_data_mean.at(j))/this->_data_std.at(j);
+            }
+        }
+
+        return;
+    }
+
 
    };
 

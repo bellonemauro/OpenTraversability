@@ -115,12 +115,12 @@ PCL_upd_DEMO::initCNN()
     unsigned int n_input_l4 = neurons; // number of inputs for the fourth layer
     unsigned int n_output = 2;    // number of outputs  --- this depends of the number of classes we have
 
-    std::vector<tiny_dnn::cnn_size_t> net_conf ({ n_input,
-                                                  n_input_l1,
-                                                  n_input_l2,
-                                                  n_input_l3,
-                                                  n_input_l4,
-                                                  n_output });
+    std::vector<size_t> net_conf ({ n_input,
+                                    n_input_l1,
+                                    n_input_l2,
+                                    n_input_l3,
+                                    n_input_l4,
+                                    n_output });
    //{ // just print some net configurations
    //  for (int i = 0; i < net_conf.size(); i++) {
    //      std::cout << "PCL_upd_DEMO::trainCNN  << message >> : net_conf " << net_conf.at(i)
@@ -132,8 +132,12 @@ PCL_upd_DEMO::initCNN()
    //            << std::endl;
    //}
 
-
-
+// reset the network in case of double initialization
+if (m_mlp.depth() > 0)
+{
+    (&m_mlp)->~network();
+    new (&m_mlp) tiny_dnn::network<tiny_dnn::sequential>;
+}
 
     // set activation function type
     int cnn_activation_type = 0;    // tanh, sigmoid, softmax, rectified linear(relu), leaky relu, identity, exponential linear units(elu)
@@ -141,19 +145,65 @@ PCL_upd_DEMO::initCNN()
 
     // create a full connected networks
     switch (cnn_activation_type) {
-            case 0: m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::tan_h>(net_conf.begin(), net_conf.end());
+            case 0: //m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::tan_h>(net_conf.begin(), net_conf.end());
+
+                    m_mlp << tiny_dnn::batch_normalization_layer(n_input, 1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::tan_h>(n_input, n_input_l1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::tan_h>(n_input_l1, n_input_l2)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::tan_h>(n_input_l2, n_input_l3)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::tan_h>(n_input_l3, n_input_l4)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::tan_h>(n_input_l4, n_output);
+
                     break;
-            case 1: m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::sigmoid>(net_conf.begin(), net_conf.end());
+            case 1: //m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::sigmoid>(net_conf.begin(), net_conf.end());
+                    m_mlp << tiny_dnn::batch_normalization_layer(n_input, 1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::sigmoid>(n_input, n_input_l1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::sigmoid>(n_input_l1, n_input_l2)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::sigmoid>(n_input_l2, n_input_l3)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::sigmoid>(n_input_l3, n_input_l4)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::sigmoid>(n_input_l4, n_output);
+
                     break;
-            case 2: m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::softmax>(net_conf.begin(), net_conf.end());
+            case 2: //m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::softmax>(net_conf.begin(), net_conf.end());
+                    m_mlp << tiny_dnn::batch_normalization_layer(n_input, 1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::softmax>(n_input, n_input_l1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::softmax>(n_input_l1, n_input_l2)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::softmax>(n_input_l2, n_input_l3)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::softmax>(n_input_l3, n_input_l4)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::softmax>(n_input_l4, n_output);
                     break;
-            case 3: m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::relu>(net_conf.begin(), net_conf.end());
+            case 3: //m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::relu>(net_conf.begin(), net_conf.end());
+                    m_mlp << tiny_dnn::batch_normalization_layer(n_input, 1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::relu>(n_input, n_input_l1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::relu>(n_input_l1, n_input_l2)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::relu>(n_input_l2, n_input_l3)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::relu>(n_input_l3, n_input_l4)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::relu>(n_input_l4, n_output);
                     break;
-            case 4: m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::leaky_relu>(net_conf.begin(), net_conf.end());
+            case 4: //m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::leaky_relu>(net_conf.begin(), net_conf.end());
+                    m_mlp << tiny_dnn::batch_normalization_layer(n_input, 1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::leaky_relu>(n_input, n_input_l1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::leaky_relu>(n_input_l1, n_input_l2)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::leaky_relu>(n_input_l2, n_input_l3)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::leaky_relu>(n_input_l3, n_input_l4)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::leaky_relu>(n_input_l4, n_output);
                     break;
-            case 5: m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::identity>(net_conf.begin(), net_conf.end());
+            case 5: //m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::identity>(net_conf.begin(), net_conf.end());
+                    m_mlp << tiny_dnn::batch_normalization_layer(n_input, 1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::identity>(n_input, n_input_l1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::identity>(n_input_l1, n_input_l2)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::identity>(n_input_l2, n_input_l3)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::identity>(n_input_l3, n_input_l4)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::identity>(n_input_l4, n_output);
+
                     break;
-            case 6: m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::identity>(net_conf.begin(), net_conf.end());
+            case 6: //m_mlp = tiny_dnn::make_mlp<tiny_dnn::activation::elu>(net_conf.begin(), net_conf.end());
+                    m_mlp << tiny_dnn::batch_normalization_layer(n_input, 1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::elu>(n_input, n_input_l1)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::elu>(n_input_l1, n_input_l2)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::elu>(n_input_l2, n_input_l3)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::elu>(n_input_l3, n_input_l4)
+                          << tiny_dnn::fully_connected_layer<tiny_dnn::activation::elu>(n_input_l4, n_output);
                     break;
 
             default: std::cout << "PCL_upd_DEMO::trainCNN  << message >> not recognized activation function " << std::endl;
@@ -186,6 +236,8 @@ PCL_upd_DEMO::trainCNN()
 
   initCNN();
 
+
+  m_cnn_training_set.normalize_data();
 
  std::vector<tiny_dnn::vec_t> data = m_cnn_training_set.dataVectors_t();
  std::vector<tiny_dnn::label_t> labels = m_cnn_training_set.dataLabels_t();
@@ -444,6 +496,7 @@ PCL_upd_DEMO::CNNclassification()
 
     tiny_dnn_data_point cnn_data_point; //--> a data point just for simplicity
     tiny_dnn_dataset cnn_data;
+    tiny_dnn_dataset cnn_data_norm;
 
     if (UPD_cloud->empty() || UPD_cloud->size() < m_patch_labelling_index) {
         QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
@@ -462,8 +515,25 @@ PCL_upd_DEMO::CNNclassification()
     cnn_data_point._label = 1.0;
     cnn_data._data.push_back(cnn_data_point);
 
-    std::vector<tiny_dnn::vec_t> data = cnn_data.dataVectors_t();
-    std::vector<tiny_dnn::label_t> labels = cnn_data.dataLabels_t();
+//    tiny_dnn_data_point cnn_data_point_norm = cnn_data.normalize_element(cnn_data_point);
+
+    std::vector<float> mean = m_cnn_training_set._data_mean;
+    std::vector<float> std_dev = m_cnn_training_set._data_std;
+
+    for ( int j = 0; j < cnn_data_point._vec.size(); j++)
+        {
+        assert (cnn_data_point._vec.size() == mean.size());
+        assert (cnn_data_point._vec.size() == std_dev.size());
+        cnn_data_point._vec.at(j) = (cnn_data_point._vec.at(j) - mean.at(j))/std_dev.at(j);
+        }
+
+
+    cnn_data_norm._data.push_back(cnn_data_point);
+
+    std::vector<tiny_dnn::vec_t> data = cnn_data_norm.dataVectors_t();
+    std::vector<tiny_dnn::label_t> labels = cnn_data_norm.dataLabels_t();
+
+
 
     if (data.size()<1 || labels.size()<1)
     {
