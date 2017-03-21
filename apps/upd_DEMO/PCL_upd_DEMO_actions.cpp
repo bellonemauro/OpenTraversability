@@ -404,12 +404,14 @@ PCL_upd_DEMO::saveTrainingDataset()
 
     m_svm_trainer.resetTrainingSet();
     m_svm_trainer.setInputTrainingSet(m_svm_training_set);
-    if (!m_svm_trainer.saveNormTrainingSet ( save_path.toUtf8().constData() ) )
+    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+
+    if (!m_svm_trainer.saveTrainingSet ( save_path.toUtf8().constData() ) )
         QMessageBox::warning(this, "Warning !", "File not saved ! <br>" + save_path);
     else
         QMessageBox::information(this, "info !", " PCL-SVM demo - SVM training set file saved at " +  save_path );
 
-    QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+
 
 }
 

@@ -241,6 +241,27 @@ void PCL_upd_DEMO::extractPatch(double _size, float _x, float _y, float _z)
     pass.setFilterLimits (x_min, x_max);
     pass.filter (*m_cloud_patch);
 
+
+    pcl::NormalEstimation<pcl::PointSurfel, pcl::PointSurfel> ne;
+    ne.setInputCloud (m_cloud_patch);
+
+    pcl::search::KdTree<pcl::PointSurfel>::Ptr tree (new pcl::search::KdTree<pcl::PointSurfel> ());
+    ne.setSearchMethod (tree);
+    double d_m = 0;
+    bool isNumeric;
+    d_m = ui->lineEdit_patchSize->text().toDouble(&isNumeric);
+    if(!isNumeric)
+    {
+        QMessageBox::warning(this, "Warning !", "the patch size is not a valid number - Filter cannot be applied !");
+        QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+        return;
+    }
+    ne.setRadiusSearch (d_m);
+
+    // Compute the features
+    ne.compute (*m_cloud_patch);
+
+
     pcl::visualization::PointCloudColorHandlerCustom<pcl::PointSurfel> rgb_color(m_cloud_patch, 255, 0, 255);
     viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 7, "m_cloud_patch");   //5 is for bigger size - in this way the point is enphasized
     /// this is just a trick to have the visualization and the update but we might get a lot of errors in the cml -- TODO fix this

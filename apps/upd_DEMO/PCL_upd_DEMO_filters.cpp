@@ -132,6 +132,52 @@ void PCL_upd_DEMO::applyVoxelization()
     ui->qvtkWidget->update ();
 
 }
+void PCL_upd_DEMO::applyMLS()
+{
+    QApplication::setOverrideCursor(Qt::WaitCursor);    //transform the cursor for waiting mode
+    //QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+    if(m_cloud_filtered->empty())removeFilters();
+
+     pcl::MovingLeastSquares<pcl::PointXYZRGBA, pcl::PointXYZRGBA> mls;
+     mls.setInputCloud (m_cloud_filtered);
+     mls.setComputeNormals(true);
+
+     double mls_searchRadius = 0;
+     bool isNumeric;
+     mls_searchRadius = ui->lineEdit_searchMLS->text().toDouble(&isNumeric);
+     if(!isNumeric)
+     {
+         QMessageBox::warning(this, "Warning !", "MLS search radius is not a valid number - Filter cannot be applied !");
+         QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+         return;
+     }
+
+     // Create a KD-Tree
+     pcl::search::KdTree<pcl::PointXYZRGBA>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGBA>);
+     // Output has the PointNormal type in order to store the normals calculated by MLS
+     pcl::PointCloud<pcl::PointXYZRGBA> mls_points;
+
+     // Set parameters
+     mls.setInputCloud (m_cloud_filtered);
+     mls.setPolynomialFit (true);
+     mls.setSearchMethod (tree);
+     mls.setSearchRadius (mls_searchRadius);
+
+     mls.process (mls_points);
+
+     pcl::copyPointCloud(mls_points, *m_cloud_filtered);
+
+     std::cout << " size of the mls point normal is " << mls_points.size() << std::endl;
+
+     QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
+
+    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, ui->lcdNumber_p->value(), "cloud");
+    pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb_color(m_cloud_filtered);
+    viewer->updatePointCloud (m_cloud_filtered, rgb_color, "cloud");
+     ui->qvtkWidget->update ();
+
+
+}
 
 void PCL_upd_DEMO::applySOR()
 {

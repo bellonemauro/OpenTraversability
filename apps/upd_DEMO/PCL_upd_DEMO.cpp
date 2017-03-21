@@ -95,6 +95,10 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   viewer->setBackgroundColor(1.0, 1.0, 1.0);  //set background to black
   ui->qvtkWidget->update ();
 
+
+  shortcut_ground = new QShortcut(QKeySequence("Ctrl+g"), this);
+  shortcut_notground = new QShortcut(QKeySequence("Ctrl+n"), this);
+
   // actions from menu
   connect (ui->actionOpen_list, SIGNAL(triggered()), this, SLOT(openFileList()));
   connect (ui->actionOpen_cloud, SIGNAL(triggered()), this, SLOT(openFile()));
@@ -128,6 +132,7 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->pushButton_applyPfilter, SIGNAL(clicked()), this, SLOT (applyPassthrogh()));
   connect (ui->pushButton_applyVoxel, SIGNAL(clicked()), this, SLOT (applyVoxelization()));
   connect (ui->pushButton_applySOR, SIGNAL(clicked()), this, SLOT (applySOR()));
+  connect (ui->pushButton_mls, SIGNAL(clicked()), this, SLOT(applyMLS()));
   connect (ui->pushButton_applyTransformation, SIGNAL(clicked()), this, SLOT(applyTransformation()));
   connect (ui->pushButton_updateVis, SIGNAL (clicked()), this, SLOT(switchVisualization()));
   connect (ui->pushButton_runUPD, SIGNAL(clicked()), this, SLOT(runUPD()));
@@ -142,9 +147,12 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->pushButton_smvTest, SIGNAL(clicked()), this, SLOT (SVMclassificationTest()));
   connect (ui->pushButton_classifyCloud, SIGNAL(clicked()), this, SLOT(SVMclassifyCloud()));
   connect (ui->pushButton_trainCNN, SIGNAL(clicked()), this, SLOT(trainCNN()));
+  connect (ui->pushButton_normalizeData, SIGNAL(clicked()), this, SLOT(normalizeCNNdata()));
   connect (ui->pushButton_classifyCNN, SIGNAL(clicked()), this, SLOT(CNNclassification()));
   connect (ui->pushButton_getTrainingDatasetFromSVMdata, SIGNAL(clicked()), this, SLOT(adaptTrainingSetFromSVMdataset()));
   connect (ui->pushButton_testCNN, SIGNAL(clicked()), this, SLOT(testCNN()));
+  connect (ui->pushButton_generateTraining, SIGNAL(clicked()), this, SLOT(SVMgenerateTraining()));
+
 
   // sliders
   connect (ui->horizontalSlider_p, SIGNAL (valueChanged (int)), this, SLOT (pointSizeSliderValueChanged (int)));
@@ -164,6 +172,8 @@ PCL_upd_DEMO::PCL_upd_DEMO (QWidget *parent) :
   connect (ui->checkBox_coordinateSystem, SIGNAL (clicked()), this, SLOT(addRemoveCoordinateSystem()));
   connect (ui->comboBox_optimizationAlgorithms, SIGNAL(currentIndexChanged(int)), this, SLOT(optimizationChanged(int)));
 
+  connect (shortcut_ground, SIGNAL(activated()), this, SLOT (labelGround()));
+  connect (shortcut_notground, SIGNAL(activated()), this, SLOT (labelNotGround()));
 
    ui->treeWidget_classification->resizeColumnToContents(0);
    ui->treeWidget_classification->resizeColumnToContents(1);

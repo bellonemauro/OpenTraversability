@@ -94,6 +94,14 @@ PCL_upd_DEMO::adaptTrainingSetFromSVMdataset()
 
 }
 
+
+void PCL_upd_DEMO::normalizeCNNdata()
+{
+ ///TODO: bug here, the training set is re-normalized every time I try to re-initialize the net
+  m_cnn_training_set.normalize_data();
+}
+
+
 void
 PCL_upd_DEMO::initCNN()
 {
@@ -209,11 +217,6 @@ if (m_mlp.depth() > 0)
             default: std::cout << "PCL_upd_DEMO::trainCNN  << message >> not recognized activation function " << std::endl;
         }
 
-
-
-
-
-
 }
 
 void
@@ -236,8 +239,8 @@ PCL_upd_DEMO::trainCNN()
 
   initCNN();
 
+//  m_cnn_training_set.normalize_data(); ///TODO: bug here, the training set is re-normalized every time I try to re-initialize the net
 
-  m_cnn_training_set.normalize_data();
 
  std::vector<tiny_dnn::vec_t> data = m_cnn_training_set.dataVectors_t();
  std::vector<tiny_dnn::label_t> labels = m_cnn_training_set.dataLabels_t();
@@ -469,12 +472,12 @@ default: typedef  tiny_dnn::cross_entropy lossFunction;
      std::vector<tiny_dnn::vec_t*> nn_weights = m_mlp[i]->weights();
 
      std::cout << "# weights at layer:" << i << "\n";
-     for (int j = 0; j< nn_weights.size(); j++) {
-         for (int k = 0; k< nn_weights.at(j)->size(); k++)
-         {
-         std::cout << " j = " << j << " k = " << k << " weight " << nn_weights.at(j)->at(k) << "\n";
-         }
-     }
+//     for (int j = 0; j< nn_weights.size(); j++) {
+//         for (int k = 0; k< nn_weights.at(j)->size(); k++)
+//         {
+//         std::cout << " j = " << j << " k = " << k << " weight " << nn_weights.at(j)->at(k) << "\n";
+//         }
+//     }
 
   QApplication::restoreOverrideCursor();    //close transform the cursor for waiting mode
  }

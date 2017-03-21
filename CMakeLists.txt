@@ -42,7 +42,7 @@ set (OTA_SOURCE_DIR ${PROJECT_SOURCE_DIR})
 # --------------------------------------
 #  FIND all required libraries 
 # --------------------------------------
-find_package ( PCL 1.7 REQUIRED )
+find_package ( PCL 1.8 REQUIRED )
 #find_package ( Boost COMPONENTS thread chrono date_time program_options filesystem system REQUIRED) #already done by PCL
 find_package ( Qt REQUIRED)
 find_package ( VTK REQUIRED)

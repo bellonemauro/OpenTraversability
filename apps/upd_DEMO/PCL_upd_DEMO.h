@@ -25,6 +25,7 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QShortcut>
 #include "ui_PCL_upd_DEMO.h"
 
 // Point Cloud Library
@@ -40,6 +41,7 @@
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/surface/mls.h>
 //for transformation
 #include <pcl/registration/transforms.h>
 // this is the only header to be included to implement a cloud SVM classifier
@@ -203,6 +205,12 @@ private slots:
     * \note
     */
   void
+  applyMLS();
+
+  /** apply SOR
+    * \note
+    */
+  void
   applySOR();
 
   /** remove applied filters
@@ -336,7 +344,7 @@ private slots:
   /**  \brief Classify a single patch (button 'what's this?')
     *  \note
     */
-  bool
+  std::vector< std::vector<double> >
   SVMpatchClassification();
 
   /**  \brief This function classifies every patch in a point cloud
@@ -345,6 +353,13 @@ private slots:
     */
   void
   SVMclassifyCloud();
+
+  /**  \brief This function is useful to generate training data,
+    *  \note  it will ask 50 times what a patch is in order to generate training
+    *  \return
+    */
+  void
+  SVMgenerateTraining();
 
 
   /// CNN Classification block
@@ -357,6 +372,13 @@ private slots:
 
   void
   testCNN();
+
+  /** \brief Normalize data for CNN
+   *  \note
+   *  \return
+   */
+  void
+  normalizeCNNdata();
 
   void
   optimizationChanged(int _value);
@@ -451,12 +473,17 @@ protected:
   void
   initCNN();
 
+
+
   void
   addSVMdataToTable(std::vector<pcl::SVMData> _data);
 
   void
   tryCNNfunctions();
 
+
+  QShortcut *shortcut_ground;
+  QShortcut *shortcut_notground;
 	
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
   PointCloudT::Ptr m_cloud;           			//--> allocate a cloud for visualization and data processing

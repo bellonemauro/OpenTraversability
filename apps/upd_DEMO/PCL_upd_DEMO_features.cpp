@@ -95,7 +95,7 @@ PCL_upd_DEMO::createFeaturesReina()
 
     // slope
     U.normalize();
-    std::cout << " U normalized = \n" << U << std::endl;
+    //std::cout << " U normalized = \n" << U << std::endl;
     Eigen::Vector3d normalDirection (0.0, 0.0, 1.0);//.transpose()
     Eigen::Vector3d product = U.transpose() * normalDirection;
     //std::cout << " product = " << product << "\n norm = " << product.norm() <<  std::endl;
@@ -143,20 +143,30 @@ PCL_upd_DEMO::createFeaturesUPD(  )
                           UPD_cloud->points[m_patch_labelling_index].normal_y,
                           UPD_cloud->points[m_patch_labelling_index].normal_z);
     double norm = vec.norm();
+
+    features.push_back( m_cloud_patch->points[m_patch_labelling_index].normal_x  );
+    features.push_back( m_cloud_patch->points[m_patch_labelling_index].normal_y  );
+    features.push_back( m_cloud_patch->points[m_patch_labelling_index].normal_z  );
     features.push_back( UPD_cloud->points[m_patch_labelling_index].normal_x / norm );
     features.push_back( UPD_cloud->points[m_patch_labelling_index].normal_y / norm );
     features.push_back( UPD_cloud->points[m_patch_labelling_index].normal_z / norm );
     features.push_back( UPD_cloud->points[m_patch_labelling_index].radius );  // upd value
-    features.push_back( norm );
+    //features.push_back( norm );
     double cloud_density = 100.0; //points per square meter
     double m_e = cloud_density * M_PI * std::pow(m_upd->getSearchRadius(), 2);
-    std::cout << " the UPD cloud size for the patch is " << UPD_cloud->size()
-              << " m_patch_labelling_index = " << m_patch_labelling_index
-              << " upd value = " << UPD_cloud->points[ m_patch_labelling_index ].radius
-              << " m_ e = " << m_e
-              << " C = K/M_E " << UPD_cloud->size() / m_e << std::endl;
-    features.push_back( UPD_cloud->size() / m_e );
-
+//    std::cout << " the UPD cloud size for the patch is " << UPD_cloud->size()
+//              << "\n m_cloud_patch normal  = " << m_cloud_patch->points[m_patch_labelling_index].normal_x << " "
+//                                             << m_cloud_patch->points[m_patch_labelling_index].normal_y << " "
+//                                             << m_cloud_patch->points[m_patch_labelling_index].normal_z << " "
+//              << "\n r vector  = " << UPD_cloud->points[m_patch_labelling_index].normal_x / norm  << " "
+//                                   << UPD_cloud->points[m_patch_labelling_index].normal_y / norm << " "
+//                                   << UPD_cloud->points[m_patch_labelling_index].normal_z / norm  << " "
+//              << "\n m_patch_labelling_index = " << m_patch_labelling_index
+//              << "\n upd value = " << UPD_cloud->points[ m_patch_labelling_index ].radius
+//              << "\n m_ e = " << m_e
+//              << "\n C = K/M_E " << UPD_cloud->size() / m_e << std::endl;
+    //features.push_back( UPD_cloud->size() / m_e );
+    features.push_back( UPD_cloud->size() / m_upd->getSearchRadius() );
 
     return features;
 
@@ -250,9 +260,20 @@ PCL_upd_DEMO::createColorFeatures( )
 
 
 
-    float r = m_cloud_patch->points[m_patch_labelling_index].r / 255.0;
-    float g = m_cloud_patch->points[m_patch_labelling_index].g / 255.0;
-    float b = m_cloud_patch->points[m_patch_labelling_index].b / 255.0;
+    float r = 0;
+    float g = 0;
+    float b = 0;
+    //avarege of color values in the patch
+    for (int i = 0; i< m_cloud_patch->size(); i++)
+    {
+        r+= m_cloud_patch->points[m_patch_labelling_index].r / 255.0;
+        g+= m_cloud_patch->points[m_patch_labelling_index].g / 255.0;
+        b+= m_cloud_patch->points[m_patch_labelling_index].b / 255.0;
+    }
+    r = r/m_cloud_patch->size();
+    g = g/m_cloud_patch->size();
+    b = b/m_cloud_patch->size();
+
     float c1 = std::atan2(r, std::max(g,b));
     float c2 = std::atan2(g, std::max(r,b));
     float c3 = std::atan2(b, std::max(r,g));
